@@ -1,6 +1,12 @@
-Tener todo lo necesario instalado 
+Para funcionamiento de proyecto EDA_Simulator..
 
-Preparar y correr el backend (Spring Boot + PostgreSQL)
+REM eda_simulator en minúscula porque no reconoce la bd
+
+1.Tener todo lo necesario instalado 
+
+2.modificar contraseña de postgres
+
+3.Preparar y correr el backend (Spring Boot + PostgreSQL)
 
 en bash
 psql -U postgres
@@ -12,4 +18,16 @@ desde consola:
 cd backend
 ./mvnw spring-boot:run   o   mvnw.cmd spring-boot:run
 
-eda_simulator en minúscula porque no reconoce la bd
+4.Levantar el frontend (React + Vite)
+cd frontend
+npm install  # Solo si es la primera vez o si hay cambios en package.json
+npm run dev
+
+Instalación de Swagger (ya esta instalada la dependencia)
+agregar <dependency>
+./mvnw clean install
+./mvnw spring-boot:run
+
+urls por el momento
+http://localhost:8080/swagger-ui/index.html
+http://localhost:5173/
