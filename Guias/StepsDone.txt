@@ -1,0 +1,14 @@
+navegacion entre páginas sin recargar la página
+cd frontend
+npm install react-router-dom    -> package.json modificado
+
+cd src
+creación de componentes Crud….jsx:
+src/components/CrudArbolBinario.jsx
+src/components/CrudSplayTree.jsx
+src/components/CrudArbolB.jsx
+src/components/CrudAVL.jsx
+
+Código base para cada componente..
+
+Configuración de enrutador en App.jsx
