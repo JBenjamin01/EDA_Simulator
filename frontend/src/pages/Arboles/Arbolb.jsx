@@ -1,7 +1,7 @@
 // src/pages/CrudArbolB.jsx
 import React, { useState } from 'react';
-import InputNodo from '../components/InputNodo';
-import BotonInsertar from '../components/BotonInsertar';
+import BotonInsertar from "@/components/BotonInsertar";
+import InputNodo from "@/components/InputNodo";
 
 export default function CrudArbolB() {
   const [valor, setValor] = useState('');

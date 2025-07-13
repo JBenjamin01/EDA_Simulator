@@ -17,3 +17,12 @@ Reutilización de código del CRUD(inputs, botones, formularios)
 creación de componentes genéricos
 src/components/InputNodo.jsx
 src/components/InsertarNodo.jsx
+
+Estructura de la web
+diferente forma de importar usando Vite alias
+manejo de rutas y nueva ubicación de las paginas de Arboles
+pero falta que hagan uso de los componentes genéricos!
+
+Reiniciar el servidor para que funcione eso de Vite
+Ctrl + C
+npm run dev

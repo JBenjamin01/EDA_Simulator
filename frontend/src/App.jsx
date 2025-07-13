@@ -1,27 +1,30 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import CrudArbolBinario from './pages/ArbolBinario';
-import CrudSplayTree from './pages/SplayTree';
-import CrudArbolB from './pages/ArbolB';
-import CrudAVL from './pages/AVL';
-import home from './pages/home';
+
+import Home from './pages/home';
+import Inserciones from './pages/inserciones';
+import ArbolesGuardados from './pages/guardados';
+import Nosotros from './pages/nosotros';
 
 function App() {
   return (
     <Router>
-      <nav>
-        <ul>
-          <li><Link to="/binario">Árbol Binario</Link></li>
-          <li><Link to="/splay">Splay Tree</Link></li>
-          <li><Link to="/arbolb">Árbol B</Link></li>
-          <li><Link to="/avl">Árbol AVL</Link></li>
-        </ul>
-      </nav>
+      <header></header>
+        <nav>
+          <ul>
+            <li><Link to="/home">Home</Link></li>
+            <li><Link to="/inserciones">Inserciones</Link></li>
+            <li><Link to="/save">Guardados</Link></li>
+            <li><Link to="/nosotros">Nosotros</Link></li>
+          </ul>
+        </nav>
+        
 
       <Routes>
-        <Route path="/binario" element={<CrudArbolBinario />} />
-        <Route path="/splay" element={<CrudSplayTree />} />
-        <Route path="/arbolb" element={<CrudArbolB />} />
-        <Route path="/avl" element={<CrudAVL />} />
+        <Route path="/home" element={<Home/>} />
+        <Route path="/arboles" element={<Inserciones/>} />
+        <Route path="/guardados" element={<ArbolesGuardados />} />
+        <Route path="/nosotros" element={<Nosotros />} />
+        <Route path="/inserciones/*" element={<Inserciones />} />
       </Routes>
     </Router>
   );

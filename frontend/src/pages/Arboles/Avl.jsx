@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import InputNodo from '../components/InputNodo';
-import BotonInsertar from '../components/BotonInsertar';
+import BotonInsertar from "@/components/BotonInsertar";
+import InputNodo from "@/components/InputNodo";
 
-export default function CrudArbolBinario() {
+export default function CrudAVL() {
   const [valor, setValor] = useState('');
   const [nodos, setNodos] = useState([]);
 
@@ -15,7 +15,7 @@ export default function CrudArbolBinario() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-2">CRUD Árbol Binario</h2>
+      <h2 className="text-xl font-bold mb-2">CRUD Árbol AVL</h2>
       <InputNodo valor={valor} onCambio={setValor} />
       <BotonInsertar onClick={insertar} />
       <ul className="mt-4">
