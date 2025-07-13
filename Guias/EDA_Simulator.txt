@@ -1,0 +1,15 @@
+Tener todo lo necesario instalado 
+
+Preparar y correr el backend (Spring Boot + PostgreSQL)
+
+en bash
+psql -U postgres
+
+ya en SQLshell
+CREATE DATABASE EDA_Simulator;
+
+desde consola:
+cd backend
+./mvnw spring-boot:run   o   mvnw.cmd spring-boot:run
+
+eda_simulator en minúscula porque no reconoce la bd
