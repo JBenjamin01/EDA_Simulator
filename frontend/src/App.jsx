@@ -1,32 +1,29 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-
-import Home from './pages/home';
-import Inserciones from './pages/inserciones';
-import ArbolesGuardados from './pages/guardados';
-import Nosotros from './pages/nosotros';
+import React, { useState } from 'react';
+import HomePage from './pages/HomePage';
+import DataStructureSimulator from './components/simulator/DataStructureSimulator';
 
 function App() {
-  return (
-    <Router>
-      <header></header>
-        <nav>
-          <ul>
-            <li><Link to="/home">Home</Link></li>
-            <li><Link to="/inserciones">Inserciones</Link></li>
-            <li><Link to="/save">Guardados</Link></li>
-            <li><Link to="/nosotros">Nosotros</Link></li>
-          </ul>
-        </nav>
-        
+  const [selectedStructure, setSelectedStructure] = useState(null);
 
-      <Routes>
-        <Route path="/home" element={<Home/>} />
-        <Route path="/arboles" element={<Inserciones/>} />
-        <Route path="/guardados" element={<ArbolesGuardados />} />
-        <Route path="/nosotros" element={<Nosotros />} />
-        <Route path="/inserciones/*" element={<Inserciones />} />
-      </Routes>
-    </Router>
+  const handleStructureSelect = (structure) => {
+    setSelectedStructure(structure);
+  };
+
+  const handleBackToHome = () => {
+    setSelectedStructure(null);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {!selectedStructure ? (
+        <HomePage onStructureSelect={handleStructureSelect} />
+      ) : (
+        <DataStructureSimulator 
+          structure={selectedStructure} 
+          onBack={handleBackToHome} 
+        />
+      )}
+    </div>
   );
 }
 
