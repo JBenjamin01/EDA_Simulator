@@ -3,6 +3,7 @@ import CrudArbolBinario from './pages/ArbolBinario';
 import CrudSplayTree from './pages/SplayTree';
 import CrudArbolB from './pages/ArbolB';
 import CrudAVL from './pages/AVL';
+import home from './pages/home';
 
 function App() {
   return (
