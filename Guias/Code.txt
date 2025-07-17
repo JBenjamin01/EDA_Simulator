@@ -1,0 +1,2694 @@
+
+FRONT
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\assets\react.svg
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\components\simulator\DataStructureSimulator.jsx:
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Play, Pause, RotateCcw, Info } from 'lucide-react';
+import ControlPanel from '../layout/ControlPanel';
+import Visualization from '../visualization/Visualization';
+import ExplanationPanel from '../layout/ExplanationPanel';
+import { createDataStructure } from '../../utils/dataStructureFactory';
+
+function DataStructureSimulator({ structure, onBack }) {
+    const [dataStructureInstance, setDataStructureInstance] = useState(null);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [currentExplanation, setCurrentExplanation] = useState('');
+    const [operationHistory, setOperationHistory] = useState([]);
+
+    useEffect(() => {
+        const instance = createDataStructure(structure.id);
+        setDataStructureInstance(instance);
+        setCurrentExplanation(`${structure.name} inicializada. Comienza agregando elementos o realizando operaciones.`);
+    }, [structure]);
+
+    const handleOperation = async (operation, value) => {
+        if (!dataStructureInstance || isAnimating) return;
+
+        setIsAnimating(true);
+        
+        try {
+        const result = await dataStructureInstance.performOperation(operation, value);
+        
+        setOperationHistory(prev => [...prev, {
+            operation,
+            value,
+            result: result.success,
+            message: result.message,
+            timestamp: new Date().toLocaleTimeString()
+        }]);
+        
+        setCurrentExplanation(result.message);
+        
+        // Trigger re-render of visualization
+        setDataStructureInstance({...dataStructureInstance});
+        
+        } catch (error) {
+        setCurrentExplanation(`Error: ${error.message}`);
+        }
+        
+        // Simulate animation delay
+        setTimeout(() => {
+        setIsAnimating(false);
+        }, 1000);
+    };
+
+    const handleReset = () => {
+        const instance = createDataStructure(structure.id);
+        setDataStructureInstance(instance);
+        setOperationHistory([]);
+        setCurrentExplanation(`${structure.name} reinicializada.`);
+    };
+
+    if (!dataStructureInstance) {
+        return <div className="flex items-center justify-center h-screen">Cargando...</div>;
+    }
+
+    return (
+        <div className="min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="bg-white border-b border-slate-200 px-6 py-4">
+            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <button
+                onClick={onBack}
+                className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                <ArrowLeft className="w-4 h-4" />
+                Volver
+                </button>
+                <div className="h-6 w-px bg-slate-300" />
+                <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${structure.color} flex items-center justify-center`}>
+                    <structure.icon className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                    <h1 className="text-xl font-semibold text-slate-800">{structure.name}</h1>
+                    <p className="text-sm text-slate-600">{structure.description}</p>
+                </div>
+                </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+                <button
+                onClick={handleReset}
+                className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                <RotateCcw className="w-4 h-4" />
+                Reiniciar
+                </button>
+                <div className="flex items-center gap-1 px-3 py-2 bg-slate-100 rounded-lg">
+                <div className={`w-2 h-2 rounded-full ${isAnimating ? 'bg-orange-500' : 'bg-green-500'}`} />
+                <span className="text-sm text-slate-600">
+                    {isAnimating ? 'Procesando...' : 'Listo'}
+                </span>
+                </div>
+            </div>
+            </div>
+        </header>
+
+        {/* Main Content */}
+        <div className="flex-1 flex">
+            {/* Control Panel */}
+            <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
+            <ControlPanel
+                structure={structure}
+                onOperation={handleOperation}
+                disabled={isAnimating}
+                operationHistory={operationHistory}
+            />
+            </div>
+
+            {/* Visualization Area */}
+            <div className="flex-1 flex flex-col">
+            <div className="flex-1 p-6 bg-slate-50">
+                <Visualization
+                dataStructure={dataStructureInstance}
+                structureType={structure.id}
+                isAnimating={isAnimating}
+                />
+            </div>
+            
+            {/* Explanation Panel */}
+            <div className="border-t border-slate-200">
+                <ExplanationPanel
+                explanation={currentExplanation}
+                structureName={structure.name}
+                />
+            </div>
+            </div>
+        </div>
+        </div>
+    );
+}
+
+export default DataStructureSimulator;
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\components\visualization\Vizualization.jsx:
+import React from 'react';
+
+function Visualization({ dataStructure, structureType, isAnimating }) {
+    const renderLinkedList = () => {
+        const nodes = dataStructure.toArray ? dataStructure.toArray() : [];
+        if (nodes.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+                <div className="w-24 h-24 border-4 border-dashed border-slate-300 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-slate-400 text-sm">Vacía</span>
+                </div>
+                <p className="text-slate-500">La lista está vacía</p>
+            </div>
+            </div>
+        );
+        }
+
+        return (
+        <div className="flex items-center justify-center h-full p-8">
+            <div className="flex items-center gap-4 overflow-x-auto">
+            {nodes.map((node, index) => (
+                <div key={index} className="flex items-center gap-2">
+                <div className={`
+                    w-16 h-16 rounded-xl border-2 border-blue-300 bg-blue-50 
+                    flex items-center justify-center font-semibold text-blue-800
+                    ${isAnimating ? 'animate-pulse' : ''}
+                    shadow-lg hover:shadow-xl transition-shadow duration-200
+                `}>
+                    {node.data}
+                </div>
+                {index < nodes.length - 1 && (
+                    <div className="flex items-center">
+                    <div className="w-8 h-px bg-slate-400"></div>
+                    <div className="w-0 h-0 border-l-4 border-l-slate-400 border-y-2 border-y-transparent"></div>
+                    </div>
+                )}
+                </div>
+            ))}
+            </div>
+        </div>
+        );
+    };
+
+    const renderStack = () => {
+        const elements = dataStructure.toArray ? dataStructure.toArray() : [];
+        if (elements.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+                <div className="w-24 h-32 border-4 border-dashed border-slate-300 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-slate-400 text-sm">Vacía</span>
+                </div>
+                <p className="text-slate-500">La pila está vacía</p>
+            </div>
+            </div>
+        );
+        }
+
+        return (
+        <div className="flex items-center justify-center h-full p-8">
+            <div className="relative">
+            <div className="text-center mb-4">
+                <span className="text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+                TOP
+                </span>
+            </div>
+            <div className="flex flex-col-reverse gap-2">
+                {elements.map((element, index) => (
+                <div
+                    key={index}
+                    className={`
+                    w-24 h-12 rounded-lg border-2 border-green-300 bg-green-50 
+                    flex items-center justify-center font-semibold text-green-800
+                    ${isAnimating && index === elements.length - 1 ? 'animate-bounce' : ''}
+                    shadow-lg hover:shadow-xl transition-all duration-200
+                    ${index === elements.length - 1 ? 'ring-2 ring-green-200' : ''}
+                    `}
+                >
+                    {element}
+                </div>
+                ))}
+            </div>
+            <div className="w-28 h-2 bg-slate-300 rounded-full mt-2 -mx-2"></div>
+            </div>
+        </div>
+        );
+    };
+
+    const renderQueue = () => {
+        const elements = dataStructure.toArray ? dataStructure.toArray() : [];
+        if (elements.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+                <div className="w-32 h-16 border-4 border-dashed border-slate-300 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-slate-400 text-sm">Vacía</span>
+                </div>
+                <p className="text-slate-500">La cola está vacía</p>
+            </div>
+            </div>
+        );
+        }
+
+        return (
+        <div className="flex items-center justify-center h-full p-8">
+            <div className="relative">
+            <div className="flex justify-between mb-4 text-sm font-medium text-slate-600">
+                <span className="bg-slate-100 px-3 py-1 rounded-full">FRONT</span>
+                <span className="bg-slate-100 px-3 py-1 rounded-full">REAR</span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto">
+                {elements.map((element, index) => (
+                <div
+                    key={index}
+                    className={`
+                    w-16 h-16 rounded-lg border-2 border-purple-300 bg-purple-50 
+                    flex items-center justify-center font-semibold text-purple-800
+                    ${isAnimating ? 'animate-pulse' : ''}
+                    shadow-lg hover:shadow-xl transition-shadow duration-200
+                    ${index === 0 ? 'ring-2 ring-purple-200' : ''}
+                    ${index === elements.length - 1 ? 'ring-2 ring-purple-200' : ''}
+                    `}
+                >
+                    {element}
+                </div>
+                ))}
+            </div>
+            </div>
+        </div>
+        );
+    };
+
+    const renderTree = () => {
+        const renderNode = (node, x = 400, y = 100, level = 0) => {
+        if (!node) return null;
+
+        const levelSpacing = 120;
+        const horizontalSpacing = Math.max(150 - level * 20, 80);
+
+        return (
+            <g key={`${node.data}-${x}-${y}`}>
+            {/* Left child connection */}
+            {node.left && (
+                <line
+                x1={x}
+                y1={y + 32}
+                x2={x - horizontalSpacing}
+                y2={y + levelSpacing}
+                stroke="#64748b"
+                strokeWidth="2"
+                />
+            )}
+            
+            {/* Right child connection */}
+            {node.right && (
+                <line
+                x1={x}
+                y1={y + 32}
+                x2={x + horizontalSpacing}
+                y2={y + levelSpacing}
+                stroke="#64748b"
+                strokeWidth="2"
+                />
+            )}
+
+            {/* Node circle */}
+            <circle
+                cx={x}
+                cy={y}
+                r="24"
+                fill="#fef3c7"
+                stroke="#f59e0b"
+                strokeWidth="2"
+                className={isAnimating ? 'animate-pulse' : ''}
+            />
+            
+            {/* Node text */}
+            <text
+                x={x}
+                y={y + 5}
+                textAnchor="middle"
+                className="fill-amber-800 font-semibold text-sm"
+            >
+                {node.data}
+            </text>
+
+            {/* Recursively render children */}
+            {node.left && renderNode(node.left, x - horizontalSpacing, y + levelSpacing, level + 1)}
+            {node.right && renderNode(node.right, x + horizontalSpacing, y + levelSpacing, level + 1)}
+            </g>
+        );
+        };
+
+        if (!dataStructure.root) {
+        return (
+            <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+                <div className="w-24 h-24 border-4 border-dashed border-slate-300 rounded-full flex items-center justify-center mb-4">
+                <span className="text-slate-400 text-sm">Vacío</span>
+                </div>
+                <p className="text-slate-500">El árbol está vacío</p>
+            </div>
+            </div>
+        );
+        }
+
+        return (
+        <div className="w-full h-full overflow-auto">
+            <svg width="800" height="600" className="mx-auto">
+            {renderNode(dataStructure.root)}
+            </svg>
+        </div>
+        );
+    };
+
+    const renderBTree = () => {
+        if (!dataStructure.root) {
+        return (
+            <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+                <div className="w-32 h-16 border-4 border-dashed border-slate-300 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-slate-400 text-sm">Vacío</span>
+                </div>
+                <p className="text-slate-500">El Árbol B está vacío</p>
+            </div>
+            </div>
+        );
+        }
+
+        const renderBNode = (node, x = 400, y = 100, level = 0) => {
+        if (!node) return null;
+
+        const levelSpacing = 120;
+        const nodeWidth = Math.max(node.keys.length * 40, 80);
+        const childSpacing = Math.max(200 - level * 30, 100);
+
+        return (
+            <g key={`${node.keys.join('-')}-${x}-${y}`}>
+            {/* Connections to children */}
+            {node.children && node.children.map((child, index) => {
+                if (!child) return null;
+                const childX = x + (index - node.children.length / 2 + 0.5) * childSpacing;
+                const childY = y + levelSpacing;
+                return (
+                <line
+                    key={`line-${index}`}
+                    x1={x}
+                    y1={y + 25}
+                    x2={childX}
+                    y2={childY - 25}
+                    stroke="#64748b"
+                    strokeWidth="2"
+                />
+                );
+            })}
+
+            {/* Node rectangle */}
+            <rect
+                x={x - nodeWidth / 2}
+                y={y - 25}
+                width={nodeWidth}
+                height="50"
+                fill="#e0f2fe"
+                stroke="#0891b2"
+                strokeWidth="2"
+                rx="8"
+                className={isAnimating ? 'animate-pulse' : ''}
+            />
+
+            {/* Keys */}
+            {node.keys.map((key, index) => (
+                <g key={`key-${index}`}>
+                {index > 0 && (
+                    <line
+                    x1={x - nodeWidth / 2 + (index * nodeWidth) / node.keys.length}
+                    y1={y - 25}
+                    x2={x - nodeWidth / 2 + (index * nodeWidth) / node.keys.length}
+                    y2={y + 25}
+                    stroke="#0891b2"
+                    strokeWidth="1"
+                    />
+                )}
+                <text
+                    x={x - nodeWidth / 2 + ((index + 0.5) * nodeWidth) / node.keys.length}
+                    y={y + 5}
+                    textAnchor="middle"
+                    className="fill-cyan-800 font-semibold text-sm"
+                >
+                    {key}
+                </text>
+                </g>
+            ))}
+
+            {/* Recursively render children */}
+            {node.children && node.children.map((child, index) => {
+                if (!child) return null;
+                const childX = x + (index - node.children.length / 2 + 0.5) * childSpacing;
+                const childY = y + levelSpacing;
+                return renderBNode(child, childX, childY, level + 1);
+            })}
+            </g>
+        );
+        };
+
+        return (
+        <div className="w-full h-full overflow-auto">
+            <svg width="800" height="600" className="mx-auto">
+            {renderBNode(dataStructure.root)}
+            </svg>
+        </div>
+        );
+    };
+
+    // Función principal que decide qué renderizar
+    const renderVisualization = () => {
+        if (!dataStructure) {
+        return (
+            <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+                <div className="w-24 h-24 border-4 border-dashed border-slate-300 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-slate-400 text-sm">Cargando...</span>
+                </div>
+                <p className="text-slate-500">Inicializando estructura de datos</p>
+            </div>
+            </div>
+        );
+        }
+
+        try {
+        switch (structureType) {
+            case 'linked-list':
+            return renderLinkedList();
+            case 'stack':
+            return renderStack();
+            case 'queue':
+            return renderQueue();
+            case 'binary-tree':
+            case 'bst':
+            case 'avl-tree':
+            case 'splay-tree':
+            return renderTree();
+            case 'b-tree':
+            return renderBTree();
+            default:
+            return (
+                <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                    <div className="w-24 h-24 border-4 border-dashed border-red-300 rounded-lg flex items-center justify-center mb-4">
+                    <span className="text-red-400 text-sm">Error</span>
+                    </div>
+                    <p className="text-red-500">Estructura no soportada: {structureType}</p>
+                </div>
+                </div>
+            );
+        }
+        } catch (error) {
+        console.error('Error en visualización:', error);
+        return (
+            <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+                <div className="w-24 h-24 border-4 border-dashed border-red-300 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-red-400 text-sm">Error</span>
+                </div>
+                <p className="text-red-500">Error al renderizar la estructura</p>
+                <p className="text-sm text-slate-500 mt-2">{error.message}</p>
+            </div>
+            </div>
+        );
+        }
+    };
+
+    return (
+        <div className="w-full h-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        {renderVisualization()}
+        </div>
+    );
+}
+
+export default Visualization;
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\components\layout\ControlPanel.jsx:
+import React, { useState } from 'react';
+import { Plus, Minus, Search, Eye, History, AlertCircle } from 'lucide-react';
+
+function ControlPanel({ structure, onOperation, disabled, operationHistory }) {
+    const [inputValue, setInputValue] = useState('');
+    const [selectedOperation, setSelectedOperation] = useState(null);
+
+    const getOperationsForStructure = (structureId) => {
+        switch (structureId) {
+        case 'linked-list':
+            return [
+            { id: 'insert', name: 'Insertar', icon: Plus, needsValue: true, color: 'blue' },
+            { id: 'delete', name: 'Eliminar', icon: Minus, needsValue: true, color: 'red' },
+            { id: 'search', name: 'Buscar', icon: Search, needsValue: true, color: 'green' },
+            { id: 'display', name: 'Mostrar', icon: Eye, needsValue: false, color: 'purple' }
+            ];
+        case 'stack':
+            return [
+            { id: 'push', name: 'Push', icon: Plus, needsValue: true, color: 'blue' },
+            { id: 'pop', name: 'Pop', icon: Minus, needsValue: false, color: 'red' },
+            { id: 'peek', name: 'Peek', icon: Eye, needsValue: false, color: 'green' },
+            { id: 'isEmpty', name: '¿Vacía?', icon: AlertCircle, needsValue: false, color: 'orange' }
+            ];
+        case 'queue':
+            return [
+            { id: 'enqueue', name: 'Enqueue', icon: Plus, needsValue: true, color: 'blue' },
+            { id: 'dequeue', name: 'Dequeue', icon: Minus, needsValue: false, color: 'red' },
+            { id: 'front', name: 'Front', icon: Eye, needsValue: false, color: 'green' },
+            { id: 'isEmpty', name: '¿Vacía?', icon: AlertCircle, needsValue: false, color: 'orange' }
+            ];
+        case 'binary-tree':
+        case 'bst':
+        case 'avl-tree':
+        case 'splay-tree':
+            return [
+            { id: 'insert', name: 'Insertar', icon: Plus, needsValue: true, color: 'blue' },
+            { id: 'delete', name: 'Eliminar', icon: Minus, needsValue: true, color: 'red' },
+            { id: 'search', name: 'Buscar', icon: Search, needsValue: true, color: 'green' },
+            { id: 'inorder', name: 'Recorrido In-Order', icon: Eye, needsValue: false, color: 'purple' }
+            ];
+        case 'b-tree':
+            return [
+            { id: 'insert', name: 'Insertar', icon: Plus, needsValue: true, color: 'blue' },
+            { id: 'delete', name: 'Eliminar', icon: Minus, needsValue: true, color: 'red' },
+            { id: 'search', name: 'Buscar', icon: Search, needsValue: true, color: 'green' },
+            { id: 'display', name: 'Mostrar Árbol', icon: Eye, needsValue: false, color: 'purple' }
+            ];
+        default:
+            return [];
+        }
+    };
+
+    const operations = getOperationsForStructure(structure.id);
+
+    const handleOperationClick = async (operation) => {
+        if (disabled) return;
+        
+        if (operation.needsValue && !inputValue.trim()) {
+        alert('Por favor, ingresa un valor');
+        return;
+        }
+
+        setSelectedOperation(operation.id);
+        await onOperation(operation.id, operation.needsValue ? inputValue.trim() : null);
+        setSelectedOperation(null);
+        
+        if (operation.needsValue) {
+        setInputValue('');
+        }
+    };
+
+    return (
+        <div className="h-full flex flex-col">
+        {/* Operations Section */}
+        <div className="p-6 border-b border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">Operaciones</h3>
+            
+            {/* Input for operations that need values */}
+            <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+                Valor (si es necesario)
+            </label>
+            <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Ingresa un valor..."
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                disabled={disabled}
+            />
+            </div>
+
+            {/* Operation Buttons */}
+            <div className="grid grid-cols-1 gap-2">
+            {operations.map((operation) => {
+                const IconComponent = operation.icon;
+                const isActive = selectedOperation === operation.id;
+                const colorClasses = {
+                blue: 'border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300',
+                red: 'border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300',
+                green: 'border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300',
+                purple: 'border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300',
+                orange: 'border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300'
+                };
+
+                return (
+                <button
+                    key={operation.id}
+                    onClick={() => handleOperationClick(operation)}
+                    disabled={disabled || isActive}
+                    className={`
+                    flex items-center gap-3 w-full px-4 py-3 border-2 rounded-lg transition-all duration-200
+                    ${isActive ? 'border-slate-400 bg-slate-100 text-slate-600' : colorClasses[operation.color]}
+                    ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}
+                    `}
+                >
+                    <IconComponent className="w-4 h-4" />
+                    <span className="font-medium">{operation.name}</span>
+                    {isActive && (
+                    <div className="ml-auto w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                    )}
+                </button>
+                );
+            })}
+            </div>
+        </div>
+
+        {/* History Section */}
+        <div className="flex-1 p-6 overflow-hidden flex flex-col">
+            <div className="flex items-center gap-2 mb-4">
+            <History className="w-5 h-5 text-slate-600" />
+            <h3 className="text-lg font-semibold text-slate-800">Historial</h3>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-2">
+            {operationHistory.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-8">
+                No hay operaciones realizadas aún
+                </p>
+            ) : (
+                operationHistory.slice().reverse().map((entry, index) => (
+                <div
+                    key={operationHistory.length - 1 - index}
+                    className={`p-3 rounded-lg border ${
+                    entry.result 
+                        ? 'border-green-200 bg-green-50' 
+                        : 'border-red-200 bg-red-50'
+                    }`}
+                >
+                    <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium text-sm text-slate-800">
+                        {entry.operation}
+                        {entry.value && ` (${entry.value})`}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                        {entry.timestamp}
+                    </span>
+                    </div>
+                    <p className="text-xs text-slate-600">
+                    {entry.message}
+                    </p>
+                </div>
+                ))
+            )}
+            </div>
+        </div>
+        </div>
+    );
+}
+
+export default ControlPanel;
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\components\layout\ExplanationPanel.jsx:
+import React from 'react';
+import { Info, BookOpen } from 'lucide-react';
+
+function ExplanationPanel({ explanation, structureName }) {
+    return (
+        <div className="bg-white p-6 border-t border-slate-200">
+        <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-semibold text-slate-800">Explicación</h3>
+                <span className="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
+                {structureName}
+                </span>
+            </div>
+            <p className="text-slate-700 leading-relaxed">
+                {explanation}
+            </p>
+            </div>
+        </div>
+        </div>
+    );
+}
+
+export default ExplanationPanel;
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\models\AVLTree.js:
+// Modelo de nodo para AVL Tree
+class AVLNode {
+    constructor(data) {
+        this.data = data;
+        this.left = null;
+        this.right = null;
+        this.height = 1;
+    }
+
+    toJSON() {
+        return {
+        data: this.data,
+        height: this.height,
+        left: this.left ? this.left.toJSON() : null,
+        right: this.right ? this.right.toJSON() : null
+        };
+    }
+    }
+
+export class AVLTree {
+    constructor() {
+        this.root = null;
+    }
+
+    async performOperation(operation, value) {
+        switch (operation) {
+        case 'insert':
+            return this.insert(value);
+        case 'delete':
+            return this.delete(value);
+        case 'search':
+            return this.search(value);
+        case 'inorder':
+            return this.inorderTraversal();
+        default:
+            throw new Error(`Operación no soportada: ${operation}`);
+        }
+    }
+
+    getHeight(node) {
+        return node ? node.height : 0;
+    }
+
+    getBalance(node) {
+        return node ? this.getHeight(node.left) - this.getHeight(node.right) : 0;
+    }
+
+    updateHeight(node) {
+        if (node) {
+        node.height = Math.max(this.getHeight(node.left), this.getHeight(node.right)) + 1;
+        }
+    }
+
+    rotateRight(y) {
+        const x = y.left;
+        const T2 = x.right;
+
+        x.right = y;
+        y.left = T2;
+
+        this.updateHeight(y);
+        this.updateHeight(x);
+
+        return x;
+    }
+
+    rotateLeft(x) {
+        const y = x.right;
+        const T2 = y.left;
+
+        y.left = x;
+        x.right = T2;
+
+        this.updateHeight(x);
+        this.updateHeight(y);
+
+        return y;
+    }
+
+    insert(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para el AVL Tree.'
+        };
+        }
+
+        this.root = this.insertNode(this.root, value);
+        
+        return {
+        success: true,
+        message: `Elemento "${value}" insertado en el AVL Tree. El árbol se mantiene balanceado automáticamente.`
+        };
+    }
+
+    insertNode(node, value) {
+        // Inserción BST normal
+        if (!node) {
+        return new AVLNode(value);
+        }
+
+        if (value < node.data) {
+        node.left = this.insertNode(node.left, value);
+        } else if (value > node.data) {
+        node.right = this.insertNode(node.right, value);
+        } else {
+        return node; // Duplicados no permitidos
+        }
+
+        // Actualizar altura
+        this.updateHeight(node);
+
+        // Obtener factor de balance
+        const balance = this.getBalance(node);
+
+        // Rotación derecha
+        if (balance > 1 && value < node.left.data) {
+        return this.rotateRight(node);
+        }
+
+        // Rotación izquierda
+        if (balance < -1 && value > node.right.data) {
+        return this.rotateLeft(node);
+        }
+
+        // Rotación izquierda-derecha
+        if (balance > 1 && value > node.left.data) {
+        node.left = this.rotateLeft(node.left);
+        return this.rotateRight(node);
+        }
+
+        // Rotación derecha-izquierda
+        if (balance < -1 && value < node.right.data) {
+        node.right = this.rotateRight(node.right);
+        return this.rotateLeft(node);
+        }
+
+        return node;
+    }
+
+    search(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para buscar.'
+        };
+        }
+
+        const found = this.searchNode(this.root, value);
+        
+        return {
+        success: found,
+        message: found 
+            ? `Elemento "${value}" encontrado en el AVL Tree.`
+            : `Elemento "${value}" no encontrado en el AVL Tree.`
+        };
+    }
+
+    searchNode(node, value) {
+        if (!node) return false;
+        
+        if (value === node.data) return true;
+        
+        if (value < node.data) {
+        return this.searchNode(node.left, value);
+        } else {
+        return this.searchNode(node.right, value);
+        }
+    }
+
+    delete(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para eliminar.'
+        };
+        }
+
+        if (!this.searchNode(this.root, value)) {
+        return {
+            success: false,
+            message: `Elemento "${value}" no encontrado en el AVL Tree.`
+        };
+        }
+
+        this.root = this.deleteNode(this.root, value);
+        
+        return {
+        success: true,
+        message: `Elemento "${value}" eliminado del AVL Tree. El balance se mantiene automáticamente.`
+        };
+    }
+
+    deleteNode(node, value) {
+        if (!node) return null;
+
+        if (value < node.data) {
+        node.left = this.deleteNode(node.left, value);
+        } else if (value > node.data) {
+        node.right = this.deleteNode(node.right, value);
+        } else {
+        if (!node.left || !node.right) {
+            const temp = node.left || node.right;
+            if (!temp) {
+            node = null;
+            } else {
+            node = temp;
+            }
+        } else {
+            const temp = this.findMin(node.right);
+            node.data = temp.data;
+            node.right = this.deleteNode(node.right, temp.data);
+        }
+        }
+
+        if (!node) return node;
+
+        this.updateHeight(node);
+
+        const balance = this.getBalance(node);
+
+        // Rotaciones para rebalancear
+        if (balance > 1 && this.getBalance(node.left) >= 0) {
+        return this.rotateRight(node);
+        }
+
+        if (balance > 1 && this.getBalance(node.left) < 0) {
+        node.left = this.rotateLeft(node.left);
+        return this.rotateRight(node);
+        }
+
+        if (balance < -1 && this.getBalance(node.right) <= 0) {
+        return this.rotateLeft(node);
+        }
+
+        if (balance < -1 && this.getBalance(node.right) > 0) {
+        node.right = this.rotateRight(node.right);
+        return this.rotateLeft(node);
+        }
+
+        return node;
+    }
+
+    findMin(node) {
+        while (node.left) {
+        node = node.left;
+        }
+        return node;
+    }
+
+    inorderTraversal() {
+        if (!this.root) {
+        return {
+            success: true,
+            message: 'El AVL Tree está vacío.'
+        };
+        }
+
+        const result = [];
+        this.inorderHelper(this.root, result);
+        
+        return {
+        success: true,
+        message: `Recorrido In-Order del AVL Tree: [${result.join(', ')}]. El árbol está balanceado.`
+        };
+    }
+
+    inorderHelper(node, result) {
+        if (node) {
+        this.inorderHelper(node.left, result);
+        result.push(node.data);
+        this.inorderHelper(node.right, result);
+        }
+    }
+
+    toJSON() {
+        return {
+        root: this.root ? this.root.toJSON() : null
+        };
+    }
+
+    toArray() {
+        const result = [];
+        this.inorderHelper(this.root, result);
+        return result;
+    }
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\models\BinaryTree.js:
+// Modelo de nodo para árbol binario
+class TreeNode {
+    constructor(data) {
+        this.data = data;
+        this.left = null;
+        this.right = null;
+    }
+
+    toJSON() {
+        return {
+        data: this.data,
+        left: this.left ? this.left.toJSON() : null,
+        right: this.right ? this.right.toJSON() : null
+        };
+    }
+    }
+
+export class BinaryTree {
+    constructor() {
+        this.root = null;
+    }
+
+    async performOperation(operation, value) {
+        switch (operation) {
+        case 'insert':
+            return this.insert(value);
+        case 'delete':
+            return this.delete(value);
+        case 'search':
+            return this.search(value);
+        case 'inorder':
+            return this.inorderTraversal();
+        default:
+            throw new Error(`Operación no soportada: ${operation}`);
+        }
+    }
+
+    insert(data) {
+        const newNode = new TreeNode(data);
+        
+        if (!this.root) {
+        this.root = newNode;
+        return {
+            success: true,
+            message: `Elemento "${data}" insertado como raíz del árbol.`
+        };
+        }
+
+        // Inserción por niveles (level order)
+        const queue = [this.root];
+        
+        while (queue.length > 0) {
+        const current = queue.shift();
+        
+        if (!current.left) {
+            current.left = newNode;
+            return {
+            success: true,
+            message: `Elemento "${data}" insertado como hijo izquierdo de "${current.data}".`
+            };
+        } else if (!current.right) {
+            current.right = newNode;
+            return {
+            success: true,
+            message: `Elemento "${data}" insertado como hijo derecho de "${current.data}".`
+            };
+        } else {
+            queue.push(current.left);
+            queue.push(current.right);
+        }
+        }
+    }
+
+    search(data) {
+        if (!this.root) {
+        return {
+            success: false,
+            message: 'El árbol está vacío.'
+        };
+        }
+
+        const queue = [this.root];
+        
+        while (queue.length > 0) {
+        const current = queue.shift();
+        
+        if (current.data === data || current.data == data) {
+            return {
+            success: true,
+            message: `Elemento "${data}" encontrado en el árbol.`
+            };
+        }
+        
+        if (current.left) queue.push(current.left);
+        if (current.right) queue.push(current.right);
+        }
+
+        return {
+        success: false,
+        message: `Elemento "${data}" no encontrado en el árbol.`
+        };
+    }
+
+    delete(data) {
+        if (!this.root) {
+        return {
+            success: false,
+            message: 'El árbol está vacío.'
+        };
+        }
+
+        // Encontrar el nodo a eliminar y el último nodo
+        const queue = [this.root];
+        let nodeToDelete = null;
+        let lastNode = null;
+        
+        while (queue.length > 0) {
+        const current = queue.shift();
+        lastNode = current;
+        
+        if (current.data === data || current.data == data) {
+            nodeToDelete = current;
+        }
+        
+        if (current.left) queue.push(current.left);
+        if (current.right) queue.push(current.right);
+        }
+
+        if (!nodeToDelete) {
+        return {
+            success: false,
+            message: `Elemento "${data}" no encontrado en el árbol.`
+        };
+        }
+
+        // Reemplazar el valor del nodo a eliminar con el último nodo
+        nodeToDelete.data = lastNode.data;
+        
+        // Eliminar el último nodo
+        this.deleteLastNode(lastNode);
+        
+        return {
+        success: true,
+        message: `Elemento "${data}" eliminado del árbol.`
+        };
+    }
+
+    deleteLastNode(lastNode) {
+        const queue = [this.root];
+        
+        while (queue.length > 0) {
+        const current = queue.shift();
+        
+        if (current.left === lastNode) {
+            current.left = null;
+            return;
+        }
+        
+        if (current.right === lastNode) {
+            current.right = null;
+            return;
+        }
+        
+        if (current.left) queue.push(current.left);
+        if (current.right) queue.push(current.right);
+        }
+    }
+
+    inorderTraversal() {
+        if (!this.root) {
+        return {
+            success: true,
+            message: 'El árbol está vacío.'
+        };
+        }
+
+        const result = [];
+        this.inorderHelper(this.root, result);
+        
+        return {
+        success: true,
+        message: `Recorrido In-Order: [${result.join(', ')}].`
+        };
+    }
+
+    inorderHelper(node, result) {
+        if (node) {
+        this.inorderHelper(node.left, result);
+        result.push(node.data);
+        this.inorderHelper(node.right, result);
+        }
+    }
+
+    toJSON() {
+        return {
+        root: this.root ? this.root.toJSON() : null
+        };
+    }
+
+    toArray() {
+        const result = [];
+        this.inorderHelper(this.root, result);
+        return result;
+    }
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\models\BTS.js:
+// Modelo de nodo para BST
+class BSTNode {
+    constructor(data) {
+        this.data = data;
+        this.left = null;
+        this.right = null;
+    }
+
+    toJSON() {
+        return {
+        data: this.data,
+        left: this.left ? this.left.toJSON() : null,
+        right: this.right ? this.right.toJSON() : null
+        };
+    }
+    }
+
+export class BST {
+    constructor() {
+        this.root = null;
+    }
+
+    async performOperation(operation, value) {
+        switch (operation) {
+        case 'insert':
+            return this.insert(value);
+        case 'delete':
+            return this.delete(value);
+        case 'search':
+            return this.search(value);
+        case 'inorder':
+            return this.inorderTraversal();
+        default:
+            throw new Error(`Operación no soportada: ${operation}`);
+        }
+    }
+
+    insert(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para el BST.'
+        };
+        }
+
+        this.root = this.insertNode(this.root, value);
+        
+        return {
+        success: true,
+        message: `Elemento "${value}" insertado en el BST siguiendo la propiedad de orden.`
+        };
+    }
+
+    insertNode(node, value) {
+        if (!node) {
+        return new BSTNode(value);
+        }
+
+        if (value < node.data) {
+        node.left = this.insertNode(node.left, value);
+        } else if (value > node.data) {
+        node.right = this.insertNode(node.right, value);
+        }
+
+        return node;
+    }
+
+    search(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para buscar.'
+        };
+        }
+
+        const found = this.searchNode(this.root, value);
+        
+        return {
+        success: found,
+        message: found 
+            ? `Elemento "${value}" encontrado en el BST.`
+            : `Elemento "${value}" no encontrado en el BST.`
+        };
+    }
+
+    searchNode(node, value) {
+        if (!node) return false;
+        
+        if (value === node.data) return true;
+        
+        if (value < node.data) {
+        return this.searchNode(node.left, value);
+        } else {
+        return this.searchNode(node.right, value);
+        }
+    }
+
+    delete(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para eliminar.'
+        };
+        }
+
+        if (!this.searchNode(this.root, value)) {
+        return {
+            success: false,
+            message: `Elemento "${value}" no encontrado en el BST.`
+        };
+        }
+
+        this.root = this.deleteNode(this.root, value);
+        
+        return {
+        success: true,
+        message: `Elemento "${value}" eliminado del BST manteniendo la propiedad de orden.`
+        };
+    }
+
+    deleteNode(node, value) {
+        if (!node) return null;
+
+        if (value < node.data) {
+        node.left = this.deleteNode(node.left, value);
+        } else if (value > node.data) {
+        node.right = this.deleteNode(node.right, value);
+        } else {
+        // Nodo encontrado
+        if (!node.left && !node.right) {
+            return null;
+        }
+        
+        if (!node.left) {
+            return node.right;
+        }
+        
+        if (!node.right) {
+            return node.left;
+        }
+        
+        // Nodo con dos hijos
+        const minRight = this.findMin(node.right);
+        node.data = minRight.data;
+        node.right = this.deleteNode(node.right, minRight.data);
+        }
+
+        return node;
+    }
+
+    findMin(node) {
+        while (node.left) {
+        node = node.left;
+        }
+        return node;
+    }
+
+    inorderTraversal() {
+        if (!this.root) {
+        return {
+            success: true,
+            message: 'El BST está vacío.'
+        };
+        }
+
+        const result = [];
+        this.inorderHelper(this.root, result);
+        
+        return {
+        success: true,
+        message: `Recorrido In-Order (ordenado): [${result.join(', ')}].`
+        };
+    }
+
+    inorderHelper(node, result) {
+        if (node) {
+        this.inorderHelper(node.left, result);
+        result.push(node.data);
+        this.inorderHelper(node.right, result);
+        }
+    }
+
+    toJSON() {
+        return {
+        root: this.root ? this.root.toJSON() : null
+        };
+    }
+
+    toArray() {
+        const result = [];
+        this.inorderHelper(this.root, result);
+        return result;
+    }
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\models\BTree.js:
+// Modelo de nodo para B-Tree
+class BTreeNode {
+    constructor(degree, isLeaf = false) {
+        this.degree = degree;
+        this.keys = [];
+        this.children = [];
+        this.isLeaf = isLeaf;
+    }
+
+    toJSON() {
+        return {
+        degree: this.degree,
+        keys: this.keys,
+        children: this.children.map(child => child ? child.toJSON() : null),
+        isLeaf: this.isLeaf
+        };
+    }
+    }
+
+export class BTree {
+    constructor(degree = 3) {
+        this.root = null;
+        this.degree = degree;
+    }
+
+    async performOperation(operation, value) {
+        switch (operation) {
+        case 'insert':
+            return this.insert(value);
+        case 'delete':
+            return this.delete(value);
+        case 'search':
+            return this.search(value);
+        case 'display':
+            return this.display();
+        default:
+            throw new Error(`Operación no soportada: ${operation}`);
+        }
+    }
+
+    insert(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para el Árbol B.'
+        };
+        }
+
+        if (!this.root) {
+        this.root = new BTreeNode(this.degree, true);
+        this.root.keys.push(value);
+        return {
+            success: true,
+            message: `Elemento "${value}" insertado como primer elemento del Árbol B.`
+        };
+        }
+
+        if (this.root.keys.length === (2 * this.degree) - 1) {
+        const newRoot = new BTreeNode(this.degree, false);
+        newRoot.children.push(this.root);
+        this.splitChild(newRoot, 0);
+        this.root = newRoot;
+        }
+
+        this.insertNonFull(this.root, value);
+
+        return {
+        success: true,
+        message: `Elemento "${value}" insertado en el Árbol B. Se mantiene la propiedad de orden y balance.`
+        };
+    }
+
+    insertNonFull(node, value) {
+        let i = node.keys.length - 1;
+
+        if (node.isLeaf) {
+        node.keys.push(0);
+        while (i >= 0 && node.keys[i] > value) {
+            node.keys[i + 1] = node.keys[i];
+            i--;
+        }
+        node.keys[i + 1] = value;
+        } else {
+        while (i >= 0 && node.keys[i] > value) {
+            i--;
+        }
+        i++;
+
+        if (node.children[i].keys.length === (2 * this.degree) - 1) {
+            this.splitChild(node, i);
+            if (node.keys[i] < value) {
+            i++;
+            }
+        }
+        this.insertNonFull(node.children[i], value);
+        }
+    }
+
+    splitChild(parent, index) {
+        const fullChild = parent.children[index];
+        const newChild = new BTreeNode(this.degree, fullChild.isLeaf);
+
+        const mid = this.degree - 1;
+
+        // Mover la mitad de las claves al nuevo nodo
+        newChild.keys = fullChild.keys.splice(mid + 1);
+        
+        // Si no es hoja, mover también los hijos
+        if (!fullChild.isLeaf) {
+        newChild.children = fullChild.children.splice(mid + 1);
+        }
+
+        // Insertar el nuevo hijo en el padre
+        parent.children.splice(index + 1, 0, newChild);
+        
+        // Mover la clave media al padre
+        parent.keys.splice(index, 0, fullChild.keys.splice(mid, 1)[0]);
+    }
+
+    search(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para buscar.'
+        };
+        }
+
+        const found = this.searchNode(this.root, value);
+        
+        return {
+        success: found,
+        message: found 
+            ? `Elemento "${value}" encontrado en el Árbol B.`
+            : `Elemento "${value}" no encontrado en el Árbol B.`
+        };
+    }
+
+    searchNode(node, value) {
+        if (!node) return false;
+
+        let i = 0;
+        while (i < node.keys.length && value > node.keys[i]) {
+        i++;
+        }
+
+        if (i < node.keys.length && value === node.keys[i]) {
+        return true;
+        }
+
+        if (node.isLeaf) {
+        return false;
+        }
+
+        return this.searchNode(node.children[i], value);
+    }
+
+    delete(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para eliminar.'
+        };
+        }
+
+        if (!this.root) {
+        return {
+            success: false,
+            message: 'El Árbol B está vacío.'
+        };
+        }
+
+        if (!this.searchNode(this.root, value)) {
+        return {
+            success: false,
+            message: `Elemento "${value}" no encontrado en el Árbol B.`
+        };
+        }
+
+        this.deleteFromNode(this.root, value);
+
+        // Si la raíz queda vacía, hacer que su único hijo sea la nueva raíz
+        if (this.root.keys.length === 0) {
+        if (!this.root.isLeaf) {
+            this.root = this.root.children[0];
+        } else {
+            this.root = null;
+        }
+        }
+
+        return {
+        success: true,
+        message: `Elemento "${value}" eliminado del Árbol B. Se mantienen las propiedades del árbol.`
+        };
+    }
+
+    deleteFromNode(node, value) {
+        let i = 0;
+        while (i < node.keys.length && value > node.keys[i]) {
+        i++;
+        }
+
+        if (i < node.keys.length && value === node.keys[i]) {
+        // Clave encontrada en este nodo
+        if (node.isLeaf) {
+            node.keys.splice(i, 1);
+        } else {
+            // Nodo interno - casos más complejos
+            if (node.children[i].keys.length >= this.degree) {
+            const predecessor = this.getPredecessor(node, i);
+            node.keys[i] = predecessor;
+            this.deleteFromNode(node.children[i], predecessor);
+            } else if (node.children[i + 1].keys.length >= this.degree) {
+            const successor = this.getSuccessor(node, i);
+            node.keys[i] = successor;
+            this.deleteFromNode(node.children[i + 1], successor);
+            } else {
+            this.merge(node, i);
+            this.deleteFromNode(node.children[i], value);
+            }
+        }
+        } else {
+        // Clave no está en este nodo
+        if (node.isLeaf) {
+            return; // Clave no encontrada
+        }
+
+        const isLastChild = (i === node.keys.length);
+
+        if (node.children[i].keys.length < this.degree) {
+            this.fill(node, i);
+        }
+
+        if (isLastChild && i > node.keys.length) {
+            this.deleteFromNode(node.children[i - 1], value);
+        } else {
+            this.deleteFromNode(node.children[i], value);
+        }
+        }
+    }
+
+    getPredecessor(node, index) {
+        let current = node.children[index];
+        while (!current.isLeaf) {
+        current = current.children[current.children.length - 1];
+        }
+        return current.keys[current.keys.length - 1];
+    }
+
+    getSuccessor(node, index) {
+        let current = node.children[index + 1];
+        while (!current.isLeaf) {
+        current = current.children[0];
+        }
+        return current.keys[0];
+    }
+
+    fill(node, index) {
+        if (index !== 0 && node.children[index - 1].keys.length >= this.degree) {
+        this.borrowFromPrev(node, index);
+        } else if (index !== node.keys.length && node.children[index + 1].keys.length >= this.degree) {
+        this.borrowFromNext(node, index);
+        } else {
+        if (index !== node.keys.length) {
+            this.merge(node, index);
+        } else {
+            this.merge(node, index - 1);
+        }
+        }
+    }
+
+    borrowFromPrev(node, index) {
+        const child = node.children[index];
+        const sibling = node.children[index - 1];
+
+        child.keys.unshift(node.keys[index - 1]);
+        node.keys[index - 1] = sibling.keys.pop();
+
+        if (!child.isLeaf) {
+        child.children.unshift(sibling.children.pop());
+        }
+    }
+
+    borrowFromNext(node, index) {
+        const child = node.children[index];
+        const sibling = node.children[index + 1];
+
+        child.keys.push(node.keys[index]);
+        node.keys[index] = sibling.keys.shift();
+
+        if (!child.isLeaf) {
+        child.children.push(sibling.children.shift());
+        }
+    }
+
+    merge(node, index) {
+        const child = node.children[index];
+        const sibling = node.children[index + 1];
+
+        child.keys.push(node.keys[index]);
+        child.keys.push(...sibling.keys);
+
+        if (!child.isLeaf) {
+        child.children.push(...sibling.children);
+        }
+
+        node.keys.splice(index, 1);
+        node.children.splice(index + 1, 1);
+    }
+
+    display() {
+        if (!this.root) {
+        return {
+            success: true,
+            message: 'El Árbol B está vacío.'
+        };
+        }
+
+        const levels = [];
+        this.displayHelper(this.root, 0, levels);
+        
+        const displayText = levels.map((level, index) => 
+        `Nivel ${index}: [${level.join('] [')}]`
+        ).join('\n');
+
+        return {
+        success: true,
+        message: `Estructura del Árbol B (grado ${this.degree}):\n${displayText}`
+        };
+    }
+
+    displayHelper(node, level, levels) {
+        if (!levels[level]) {
+        levels[level] = [];
+        }
+
+        levels[level].push(node.keys.join(', '));
+
+        if (!node.isLeaf) {
+        for (const child of node.children) {
+            this.displayHelper(child, level + 1, levels);
+        }
+        }
+    }
+
+    toJSON() {
+        return {
+        root: this.root ? this.root.toJSON() : null,
+        degree: this.degree
+        };
+    }
+
+    toArray() {
+        const result = [];
+        this.collectKeys(this.root, result);
+        return result.sort((a, b) => a - b);
+    }
+
+    collectKeys(node, result) {
+        if (!node) return;
+        
+        result.push(...node.keys);
+        
+        if (!node.isLeaf) {
+        for (const child of node.children) {
+            this.collectKeys(child, result);
+        }
+        }
+    }
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\models\LinkedList.js:
+// Modelo de nodo para lista enlazada
+class ListNode {
+    constructor(data) {
+        this.data = data;
+        this.next = null;
+    }
+
+    toJSON() {
+        return {
+        data: this.data,
+        next: this.next ? this.next.toJSON() : null
+        };
+    }
+    }
+
+export class LinkedList {
+    constructor() {
+        this.head = null;
+        this.size = 0;
+    }
+
+    async performOperation(operation, value) {
+        switch (operation) {
+        case 'insert':
+            return this.insert(value);
+        case 'delete':
+            return this.delete(value);
+        case 'search':
+            return this.search(value);
+        case 'display':
+            return this.display();
+        default:
+            throw new Error(`Operación no soportada: ${operation}`);
+        }
+    }
+
+    insert(data) {
+        const newNode = new ListNode(data);
+        
+        if (!this.head) {
+        this.head = newNode;
+        this.size++;
+        return {
+            success: true,
+            message: `Elemento "${data}" insertado como primer nodo de la lista.`
+        };
+        }
+
+        // Insertar al final
+        let current = this.head;
+        while (current.next) {
+        current = current.next;
+        }
+        current.next = newNode;
+        this.size++;
+
+        return {
+        success: true,
+        message: `Elemento "${data}" insertado al final de la lista. Tamaño actual: ${this.size}.`
+        };
+    }
+
+    delete(data) {
+        if (!this.head) {
+        return {
+            success: false,
+            message: 'La lista está vacía. No se puede eliminar ningún elemento.'
+        };
+        }
+
+        // Si el elemento a eliminar es el primero
+        if (this.head.data === data || this.head.data == data) {
+        this.head = this.head.next;
+        this.size--;
+        return {
+            success: true,
+            message: `Elemento "${data}" eliminado de la cabeza de la lista. Tamaño actual: ${this.size}.`
+        };
+        }
+
+        let current = this.head;
+        while (current.next && current.next.data !== data && current.next.data != data) {
+        current = current.next;
+        }
+
+        if (current.next) {
+        current.next = current.next.next;
+        this.size--;
+        return {
+            success: true,
+            message: `Elemento "${data}" encontrado y eliminado de la lista. Tamaño actual: ${this.size}.`
+        };
+        }
+
+        return {
+        success: false,
+        message: `Elemento "${data}" no encontrado en la lista.`
+        };
+    }
+
+    search(data) {
+        let current = this.head;
+        let position = 0;
+
+        while (current) {
+        if (current.data === data || current.data == data) {
+            return {
+            success: true,
+            message: `Elemento "${data}" encontrado en la posición ${position}.`
+            };
+        }
+        current = current.next;
+        position++;
+        }
+
+        return {
+        success: false,
+        message: `Elemento "${data}" no encontrado en la lista.`
+        };
+    }
+
+    display() {
+        if (!this.head) {
+        return {
+            success: true,
+            message: 'La lista está vacía.'
+        };
+        }
+
+        const elements = this.toArray().map(node => node.data);
+        return {
+        success: true,
+        message: `Lista completa: [${elements.join(' -> ')}]. Tamaño: ${this.size} elementos.`
+        };
+    }
+
+    toArray() {
+        const result = [];
+        let current = this.head;
+        while (current) {
+        result.push(current);
+        current = current.next;
+        }
+        return result;
+    }
+
+    toJSON() {
+        return {
+        head: this.head ? this.head.toJSON() : null,
+        size: this.size
+        };
+    }
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\models\Queue.js:
+export class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    async performOperation(operation, value) {
+        switch (operation) {
+        case 'enqueue':
+            return this.enqueue(value);
+        case 'dequeue':
+            return this.dequeue();
+        case 'front':
+            return this.front();
+        case 'isEmpty':
+            return this.isEmpty();
+        default:
+            throw new Error(`Operación no soportada: ${operation}`);
+        }
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+        return {
+        success: true,
+        message: `Elemento "${element}" agregado al final de la cola. Tamaño actual: ${this.items.length}.`
+        };
+    }
+
+    dequeue() {
+        if (this.items.length === 0) {
+        return {
+            success: false,
+            message: 'La cola está vacía. No se puede realizar la operación dequeue.'
+        };
+        }
+
+        const element = this.items.shift();
+        return {
+        success: true,
+        message: `Elemento "${element}" eliminado del frente de la cola. Tamaño actual: ${this.items.length}.`
+        };
+    }
+
+    front() {
+        if (this.items.length === 0) {
+        return {
+            success: false,
+            message: 'La cola está vacía. No hay elemento al frente.'
+        };
+        }
+
+        const frontElement = this.items[0];
+        return {
+        success: true,
+        message: `El elemento al frente de la cola es: "${frontElement}".`
+        };
+    }
+
+    isEmpty() {
+        const empty = this.items.length === 0;
+        return {
+        success: true,
+        message: empty ? 'La cola está vacía.' : `La cola contiene ${this.items.length} elementos.`
+        };
+    }
+
+    toArray() {
+        return [...this.items];
+    }
+
+    toJSON() {
+        return {
+        items: this.items,
+        size: this.items.length
+        };
+    }
+
+    toArray() {
+        return [...this.items];
+    }
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\models\SplayTree.js:
+// Modelo de nodo para Splay Tree
+class SplayNode {
+    constructor(data) {
+        this.data = data;
+        this.left = null;
+        this.right = null;
+    }
+
+    toJSON() {
+        return {
+        data: this.data,
+        left: this.left ? this.left.toJSON() : null,
+        right: this.right ? this.right.toJSON() : null
+        };
+    }
+    }
+
+export class SplayTree {
+    constructor() {
+        this.root = null;
+    }
+
+    async performOperation(operation, value) {
+        switch (operation) {
+        case 'insert':
+            return this.insert(value);
+        case 'delete':
+            return this.delete(value);
+        case 'search':
+            return this.search(value);
+        case 'inorder':
+            return this.inorderTraversal();
+        default:
+            throw new Error(`Operación no soportada: ${operation}`);
+        }
+    }
+
+    rotateRight(node) {
+        const newRoot = node.left;
+        node.left = newRoot.right;
+        newRoot.right = node;
+        return newRoot;
+    }
+
+    rotateLeft(node) {
+        const newRoot = node.right;
+        node.right = newRoot.left;
+        newRoot.left = node;
+        return newRoot;
+    }
+
+    splay(node, value) {
+        if (!node || node.data === value) {
+        return node;
+        }
+
+        // Valor está en el subárbol izquierdo
+        if (value < node.data) {
+        if (!node.left) return node;
+
+        // Zig-Zig (izquierda-izquierda)
+        if (value < node.left.data) {
+            node.left.left = this.splay(node.left.left, value);
+            node = this.rotateRight(node);
+        }
+        // Zig-Zag (izquierda-derecha)
+        else if (value > node.left.data) {
+            node.left.right = this.splay(node.left.right, value);
+            if (node.left.right) {
+            node.left = this.rotateLeft(node.left);
+            }
+        }
+
+        return node.left ? this.rotateRight(node) : node;
+        }
+        // Valor está en el subárbol derecho
+        else {
+        if (!node.right) return node;
+
+        // Zag-Zag (derecha-derecha)
+        if (value > node.right.data) {
+            node.right.right = this.splay(node.right.right, value);
+            node = this.rotateLeft(node);
+        }
+        // Zag-Zig (derecha-izquierda)
+        else if (value < node.right.data) {
+            node.right.left = this.splay(node.right.left, value);
+            if (node.right.left) {
+            node.right = this.rotateRight(node.right);
+            }
+        }
+
+        return node.right ? this.rotateLeft(node) : node;
+        }
+    }
+
+    insert(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para el Splay Tree.'
+        };
+        }
+
+        if (!this.root) {
+        this.root = new SplayNode(value);
+        return {
+            success: true,
+            message: `Elemento "${value}" insertado como raíz del Splay Tree.`
+        };
+        }
+
+        this.root = this.splay(this.root, value);
+
+        if (this.root.data === value) {
+        return {
+            success: false,
+            message: `Elemento "${value}" ya existe en el Splay Tree.`
+        };
+        }
+
+        const newNode = new SplayNode(value);
+
+        if (value < this.root.data) {
+        newNode.right = this.root;
+        newNode.left = this.root.left;
+        this.root.left = null;
+        } else {
+        newNode.left = this.root;
+        newNode.right = this.root.right;
+        this.root.right = null;
+        }
+
+        this.root = newNode;
+
+        return {
+        success: true,
+        message: `Elemento "${value}" insertado en el Splay Tree y movido a la raíz mediante operación splay.`
+        };
+    }
+
+    search(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para buscar.'
+        };
+        }
+
+        if (!this.root) {
+        return {
+            success: false,
+            message: 'El Splay Tree está vacío.'
+        };
+        }
+
+        this.root = this.splay(this.root, value);
+
+        const found = this.root.data === value;
+        
+        return {
+        success: found,
+        message: found 
+            ? `Elemento "${value}" encontrado y movido a la raíz del Splay Tree.`
+            : `Elemento "${value}" no encontrado en el Splay Tree. El último nodo accedido está ahora en la raíz.`
+        };
+    }
+
+    delete(data) {
+        const value = parseInt(data);
+        if (isNaN(value)) {
+        return {
+            success: false,
+            message: 'Por favor, ingresa un número válido para eliminar.'
+        };
+        }
+
+        if (!this.root) {
+        return {
+            success: false,
+            message: 'El Splay Tree está vacío.'
+        };
+        }
+
+        this.root = this.splay(this.root, value);
+
+        if (this.root.data !== value) {
+        return {
+            success: false,
+            message: `Elemento "${value}" no encontrado en el Splay Tree.`
+        };
+        }
+
+        if (!this.root.left) {
+        this.root = this.root.right;
+        } else {
+        const rightSubtree = this.root.right;
+        this.root = this.root.left;
+        this.root = this.splay(this.root, value);
+        this.root.right = rightSubtree;
+        }
+
+        return {
+        success: true,
+        message: `Elemento "${value}" eliminado del Splay Tree. La estructura se ha reorganizado.`
+        };
+    }
+
+    inorderTraversal() {
+        if (!this.root) {
+        return {
+            success: true,
+            message: 'El Splay Tree está vacío.'
+        };
+        }
+
+        const result = [];
+        this.inorderHelper(this.root, result);
+        
+        return {
+        success: true,
+        message: `Recorrido In-Order del Splay Tree: [${result.join(', ')}]. Raíz actual: ${this.root.data}.`
+        };
+    }
+
+    inorderHelper(node, result) {
+        if (node) {
+        this.inorderHelper(node.left, result);
+        result.push(node.data);
+        this.inorderHelper(node.right, result);
+        }
+    }
+
+    toJSON() {
+        return {
+        root: this.root ? this.root.toJSON() : null
+        };
+    }
+
+    toArray() {
+        const result = [];
+        this.inorderHelper(this.root, result);
+        return result;
+    }
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\models\Stack.js:
+export class Stack {
+    constructor() {
+        this.items = [];
+    }
+
+    async performOperation(operation, value) {
+        switch (operation) {
+        case 'push':
+            return this.push(value);
+        case 'pop':
+            return this.pop();
+        case 'peek':
+            return this.peek();
+        case 'isEmpty':
+            return this.isEmpty();
+        default:
+            throw new Error(`Operación no soportada: ${operation}`);
+        }
+    }
+
+    push(element) {
+        this.items.push(element);
+        return {
+        success: true,
+        message: `Elemento "${element}" agregado al tope de la pila. Tamaño actual: ${this.items.length}.`
+        };
+    }
+
+    pop() {
+        if (this.items.length === 0) {
+        return {
+            success: false,
+            message: 'La pila está vacía. No se puede realizar la operación pop.'
+        };
+        }
+
+        const element = this.items.pop();
+        return {
+        success: true,
+        message: `Elemento "${element}" eliminado del tope de la pila. Tamaño actual: ${this.items.length}.`
+        };
+    }
+
+    peek() {
+        if (this.items.length === 0) {
+        return {
+            success: false,
+            message: 'La pila está vacía. No hay elemento en el tope.'
+        };
+        }
+
+        const topElement = this.items[this.items.length - 1];
+        return {
+        success: true,
+        message: `El elemento en el tope de la pila es: "${topElement}".`
+        };
+    }
+
+    isEmpty() {
+        const empty = this.items.length === 0;
+        return {
+        success: true,
+        message: empty ? 'La pila está vacía.' : `La pila contiene ${this.items.length} elementos.`
+        };
+    }
+
+    toArray() {
+        return [...this.items];
+    }
+
+    toJSON() {
+        return {
+        items: this.items,
+        size: this.items.length
+        };
+    }
+
+    toArray() {
+        return [...this.items];
+    }
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\pages\HomePage.jsx:
+import React from 'react';
+import { List, FileStack as Stack, Layers, GitBranch, TreePine, ArrowRight, BookOpen, Scale, Shuffle, Database } from 'lucide-react';
+
+const dataStructures = [
+    {
+        id: 'linked-list',
+        name: 'Lista Enlazada',
+        description: 'Secuencia de nodos conectados dinámicamente',
+        icon: List,
+        color: 'from-blue-500 to-blue-600',
+        operations: ['Insertar', 'Eliminar', 'Buscar', 'Recorrer']
+    },
+    {
+        id: 'stack',
+        name: 'Pila (Stack)',
+        description: 'Estructura LIFO - Último en entrar, primero en salir',
+        icon: Stack,
+        color: 'from-green-500 to-green-600',
+        operations: ['Push', 'Pop', 'Peek', 'Verificar vacía']
+    },
+    {
+        id: 'queue',
+        name: 'Cola (Queue)',
+        description: 'Estructura FIFO - Primero en entrar, primero en salir',
+        icon: Layers,
+        color: 'from-purple-500 to-purple-600',
+        operations: ['Enqueue', 'Dequeue', 'Front', 'Verificar vacía']
+    },
+    {
+        id: 'binary-tree',
+        name: 'Árbol Binario',
+        description: 'Estructura jerárquica con máximo 2 hijos por nodo',
+        icon: GitBranch,
+        color: 'from-orange-500 to-orange-600',
+        operations: ['Insertar', 'Recorrido', 'Buscar', 'Eliminar']
+    },
+    {
+        id: 'bst',
+        name: 'Árbol Binario de Búsqueda',
+        description: 'Árbol binario ordenado para búsquedas eficientes',
+        icon: TreePine,
+        color: 'from-red-500 to-red-600',
+        operations: ['Insertar', 'Buscar', 'Eliminar', 'Recorridos']
+    },
+    {
+        id: 'avl-tree',
+        name: 'Árbol AVL',
+        description: 'Árbol binario auto-balanceado con rotaciones automáticas',
+        icon: Scale,
+        color: 'from-indigo-500 to-indigo-600',
+        operations: ['Insertar', 'Eliminar', 'Buscar', 'Rotaciones', 'Balance']
+    },
+    {
+        id: 'splay-tree',
+        name: 'Splay Tree',
+        description: 'Árbol auto-ajustable que mueve elementos accedidos a la raíz',
+        icon: Shuffle,
+        color: 'from-pink-500 to-pink-600',
+        operations: ['Insertar', 'Buscar', 'Eliminar', 'Splay', 'Rotaciones']
+    },
+    {
+        id: 'b-tree',
+        name: 'Árbol B',
+        description: 'Árbol balanceado de múltiples vías optimizado para almacenamiento',
+        icon: Database,
+        color: 'from-teal-500 to-teal-600',
+        operations: ['Insertar', 'Eliminar', 'Buscar', 'Dividir', 'Fusionar']
+    }
+];
+
+function HomePage({ onStructureSelect }) {
+    return (
+        <div className="min-h-screen flex flex-col">
+        {/* Header */}
+        <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 px-6 py-4">
+            <div className="max-w-7xl mx-auto flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-white" />
+            </div>
+            <div>
+                <h1 className="text-2xl font-bold text-slate-800">EDA - Simulator</h1>
+                <p className="text-sm text-slate-600">Un Simulador Visual de Estructuras de Datos</p>
+            </div>
+            </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 px-6 py-12">
+            <div className="max-w-7xl mx-auto">
+            {/* Hero Section */}
+            <div className="text-center mb-16">
+                <h2 className="text-4xl font-bold text-slate-800 mb-4">
+                Aprende Estructuras de Datos de Forma Visual
+                </h2>
+                <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                Experimenta con las estructuras de datos más importantes a través de simulaciones 
+                interactivas y visualizaciones en tiempo real.
+                </p>
+            </div>
+
+            {/* Data Structures Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {dataStructures.map((structure) => {
+                const IconComponent = structure.icon;
+                return (
+                    <div
+                    key={structure.id}
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-slate-200"
+                    onClick={() => onStructureSelect(structure)}
+                    >
+                    <div className="flex items-center justify-between mb-4">
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${structure.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
+                        <IconComponent className="w-6 h-6 text-white" />
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-1 transition-all duration-200" />
+                    </div>
+                    
+                    <h3 className="text-xl font-semibold text-slate-800 mb-2">
+                        {structure.name}
+                    </h3>
+                    
+                    <p className="text-slate-600 mb-4 text-sm leading-relaxed">
+                        {structure.description}
+                    </p>
+                    
+                    <div className="space-y-2">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                        Operaciones disponibles:
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                        {structure.operations.map((operation, index) => (
+                            <span
+                            key={index}
+                            className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-lg"
+                            >
+                            {operation}
+                            </span>
+                        ))}
+                        </div>
+                    </div>
+                    </div>
+                );
+                })}
+            </div>
+
+            {/* Features Section */}
+            <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <GitBranch className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Visualización Interactiva</h3>
+                <p className="text-slate-600 text-sm">
+                    Observa cada operación paso a paso con animaciones fluidas y claras.
+                </p>
+                </div>
+                
+                <div className="text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <BookOpen className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Explicaciones Detalladas</h3>
+                <p className="text-slate-600 text-sm">
+                    Aprende con explicaciones en tiempo real de cada operación y concepto.
+                </p>
+                </div>
+                
+                <div className="text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Layers className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Múltiples Estructuras</h3>
+                <p className="text-slate-600 text-sm">
+                    Explora diferentes estructuras de datos y comprende sus casos de uso.
+                </p>
+                </div>
+            </div>
+            </div>
+        </main>
+        </div>
+    );
+}
+
+export default HomePage;
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\utils\dataStructureFactory.js:
+import { LinkedList } from '../models/LinkedList';
+import { Stack } from '../models/Stack';
+import { Queue } from '../models/Queue';
+import { BinaryTree } from '../models/BinaryTree';
+import { BST } from '../models/BST';
+import { AVLTree } from '../models/AVLTree';
+import { SplayTree } from '../models/SplayTree';
+import { BTree } from '../models/BTree';
+
+export function createDataStructure(type) {
+    switch (type) {
+        case 'linked-list':
+        return new LinkedList();
+        case 'stack':
+        return new Stack();
+        case 'queue':
+        return new Queue();
+        case 'binary-tree':
+        return new BinaryTree();
+        case 'bst':
+        return new BST();
+        case 'avl-tree':
+        return new AVLTree();
+        case 'splay-tree':
+        return new SplayTree();
+        case 'b-tree':
+        return new BTree();
+        default:
+        throw new Error(`Estructura de datos no soportada: ${type}`);
+    }
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\App.jsx:
+import React, { useState } from 'react';
+import HomePage from './pages/HomePage';
+import DataStructureSimulator from './components/simulator/DataStructureSimulator';
+
+function App() {
+  const [selectedStructure, setSelectedStructure] = useState(null);
+
+  const handleStructureSelect = (structure) => {
+    setSelectedStructure(structure);
+  };
+
+  const handleBackToHome = () => {
+    setSelectedStructure(null);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {!selectedStructure ? (
+        <HomePage onStructureSelect={handleStructureSelect} />
+      ) : (
+        <DataStructureSimulator 
+          structure={selectedStructure} 
+          onBack={handleBackToHome} 
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\index.cs:
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main.jsx:
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\App.css:
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\public\vite.svg
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\node_modules\
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\.gitignore
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\eslint.config.js
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\index.html
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\package-lock.json
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\package.json
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\postcss.config.
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\tailwind.config.js
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\vite.config.js

@@ -26,3 +26,5 @@ pero falta que hagan uso de los componentes genéricos!
 Reiniciar el servidor para que funcione eso de Vite
 Ctrl + C
 npm run dev
+
+revisión de cambios
