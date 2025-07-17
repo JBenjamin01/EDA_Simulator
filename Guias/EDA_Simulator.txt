@@ -3,7 +3,7 @@ Para funcionamiento de proyecto EDA_Simulator..
 eda_simulator en minúscula porque no reconoce la bd
 
 1.Tener todo lo necesario instalado
- 
+
 2.modificar contraseña de postgres
 
 
@@ -74,8 +74,8 @@ git:
 en la copia de trabajo de 'frontend/eslint.config.js', LF será reemplazado por CRLF la próxima vez que Git lo toque
 
 
-ESTRUCTURA
 
+ESTRUCTURA:
 
 FRONTEND
 C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\assets\react.svg
@@ -121,6 +121,11 @@ BACKEND
 C:\Users\TIJERO\Desktop\EDA_Simulator\backend\.mvn\wrapper\maven-wrapper.properties
 
 C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\BackendApplication.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\config\WebConfig.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\controller\BTreeController.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\model\BTree.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\model\BTreeNode.java
+
 C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\resources\application.properties
 
 C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\test\java\com\eda\backend\BackendApplicationTest.java
