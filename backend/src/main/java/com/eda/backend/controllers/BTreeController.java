@@ -1,9 +1,10 @@
-package com.eda.backend.controller;
+package com.eda.backend.controllers;
 
 
-import com.eda.backend.model.BTree;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.*;
+
+import com.eda.backend.models.BTree;
 
 @RestController
 @RequestMapping("/api/btree")

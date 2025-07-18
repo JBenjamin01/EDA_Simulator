@@ -1,4 +1,4 @@
-package com.eda.backend.model;
+package com.eda.backend.models;
 
 import java.util.ArrayList;
 import java.util.Collections;
