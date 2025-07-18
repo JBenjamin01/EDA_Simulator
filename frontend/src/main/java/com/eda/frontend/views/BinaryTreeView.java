@@ -1,20 +1,22 @@
 package com.eda.frontend.views;
 
 import com.eda.frontend.components.TreeNodeView;
-import javafx.animation.TranslateTransition;
+import com.eda.frontend.tree.BinaryTree;
+import com.eda.frontend.tree.BinaryTreeNode;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
-
-import java.util.Random;
 
 public class BinaryTreeView extends VBox {
 
     private final Pane canvas;
+    private final BinaryTree tree;
 
     public BinaryTreeView() {
         setSpacing(10);
+        tree = new BinaryTree();
 
         Label title = new Label("Simulador de Árbol Binario");
         TextField input = new TextField();
@@ -28,14 +30,16 @@ public class BinaryTreeView extends VBox {
 
         canvas = new Pane();
         canvas.setStyle("-fx-border-color: gray; -fx-background-color: white;");
-        canvas.setPrefHeight(400);
+        canvas.setPrefHeight(500);
+        canvas.setPrefWidth(800);
 
         getChildren().addAll(title, controls, canvas);
 
         insert.setOnAction(e -> {
             try {
                 int value = Integer.parseInt(input.getText());
-                addAnimatedNode(value);
+                tree.insert(value);
+                drawTree();
                 input.clear();
             } catch (NumberFormatException ex) {
                 showError("Ingrese un número válido");
@@ -43,22 +47,39 @@ public class BinaryTreeView extends VBox {
         });
     }
 
-    private void addAnimatedNode(int value) {
-        TreeNodeView node = new TreeNodeView(value);
+    private void drawTree() {
+        canvas.getChildren().clear();
+        drawNode(tree.getRoot(), canvas.getWidth() / 2, 50, canvas.getWidth() / 4);
+    }
 
-        // Aparecerá desde arriba, en una posición aleatoria
-        Random rand = new Random();
-        double startX = rand.nextDouble() * (canvas.getWidth() - 40) + 20;
-        double endY = 100 + rand.nextDouble() * 100;
+    private void drawNode(BinaryTreeNode node, double x, double y, double offset) {
+        if (node == null) return;
 
-        node.setTranslateX(startX);
-        node.setTranslateY(-50); // Empieza arriba
+        node.x = x;
+        node.y = y;
 
-        canvas.getChildren().add(node);
+        TreeNodeView nodeView = new TreeNodeView(node.value);
+        nodeView.setTranslateX(x);
+        nodeView.setTranslateY(y);
+        canvas.getChildren().add(nodeView);
 
-        TranslateTransition transition = new TranslateTransition(Duration.seconds(1), node);
-        transition.setToY(endY);
-        transition.play();
+        if (node.left != null) {
+            double childX = x - offset;
+            double childY = y + 80;
+            drawNode(node.left, childX, childY, offset / 2);
+
+            Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
+            canvas.getChildren().add(line);
+        }
+
+        if (node.right != null) {
+            double childX = x + offset;
+            double childY = y + 80;
+            drawNode(node.right, childX, childY, offset / 2);
+
+            Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
+            canvas.getChildren().add(line);
+        }
     }
 
     private void showError(String message) {
