@@ -1,4 +1,4 @@
-package com.example;
+package com.eda.frontend;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
