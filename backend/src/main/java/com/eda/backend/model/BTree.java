@@ -51,4 +51,75 @@ public class BTree {
             }
         }
     }
+
+    public void insert(int key) {
+        if (root == null) {
+            root = new BTreeNode(degree, true);
+            root.getKeys().add(key);
+        } else {
+            if (root.getKeys().size() == 2 * degree - 1) {
+                BTreeNode newRoot = new BTreeNode(degree, false);
+                newRoot.getChildren().add(root);
+                splitChild(newRoot, 0);
+                insertNonFull(newRoot, key);
+                root = newRoot;
+            } else {
+                insertNonFull(root, key);
+            }
+        }
+    }
+
+    private void insertNonFull(BTreeNode node, int key) {
+        int i = node.getKeys().size() - 1;
+
+        if (node.isLeaf()) {
+            node.getKeys().add(0); // Espacio
+            while (i >= 0 && key < node.getKeys().get(i)) {
+                node.getKeys().set(i + 1, node.getKeys().get(i));
+                i--;
+            }
+            node.getKeys().set(i + 1, key);
+        } else {
+            while (i >= 0 && key < node.getKeys().get(i)) {
+                i--;
+            }
+            i++;
+            BTreeNode child = node.getChildren().get(i);
+            if (child.getKeys().size() == 2 * degree - 1) {
+                splitChild(node, i);
+                if (key > node.getKeys().get(i)) {
+                    i++;
+                }
+            }
+            insertNonFull(node.getChildren().get(i), key);
+        }
+    }
+
+    private void splitChild(BTreeNode parent, int index) {
+        BTreeNode fullChild = parent.getChildren().get(index);
+        BTreeNode newChild = new BTreeNode(degree, fullChild.isLeaf());
+
+        // Mover mitad derecha de claves
+        for (int j = 0; j < degree - 1; j++) {
+            newChild.getKeys().add(fullChild.getKeys().remove(degree));
+        }
+
+        // Mover hijos si no es hoja
+        if (!fullChild.isLeaf()) {
+            for (int j = 0; j < degree; j++) {
+                newChild.getChildren().add(fullChild.getChildren().remove(degree));
+            }
+        }
+
+        parent.getChildren().add(index + 1, newChild);
+        parent.getKeys().add(index, fullChild.getKeys().remove(degree - 1));
+    }
+
+    public void reset() {
+    this.root = null;
+}
+
+
+
+
 }

@@ -22,6 +22,7 @@ eda_simulator en minúscula porque no reconoce la bd
 
 > cd backend
 
+Compilar Backend
 // Downloaded Maven
 > mvn clean install
 
@@ -29,7 +30,7 @@ eda_simulator en minúscula porque no reconoce la bd
 // > ./mvnw clean install      # En Linux/macOS
 > mvnw.cmd clean install    # En Windows
 
-// Ejecutar Backend
+Ejecutar Backend
 > ./mvnw spring-boot:run   o   mvnw.cmd spring-boot:run  o  java -jar target/backend-0.0.1-SNAPSHOT.jar
 // puerto 8080 por defecto, cámbialo en :
 // > cd EDA_Simulator\backend\src\main\resources\application.properties
