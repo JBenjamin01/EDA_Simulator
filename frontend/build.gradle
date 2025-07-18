@@ -1,0 +1,30 @@
+plugins {
+  id 'org.openjfx.javafxplugin' version "0.1.0"
+  id 'jpro-gradle-plugin'
+}
+
+version = "1.0-SNAPSHOT"
+group = 'com.example'
+
+repositories {
+  mavenCentral()
+  maven { url "https://sandec.jfrog.io/artifactory/repo" }
+}
+
+compileJava {
+  sourceCompatibility = 21
+  targetCompatibility = 21
+}
+
+javafx {
+  version = "23.0.1"
+  modules = ['javafx.controls']
+}
+
+application {
+  mainClassName = 'com.example.JavaFXApp'
+}
+
+jpro {
+  port = 8080
+}
