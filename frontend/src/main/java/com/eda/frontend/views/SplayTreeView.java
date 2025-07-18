@@ -22,9 +22,9 @@ public class SplayTreeView extends VBox {
 
         Button insert = new Button("Insertar");
         Button delete = new Button("Eliminar");
-        
+        Button search = new Button("Buscar");
 
-        HBox controls = new HBox(10, input, insert, delete);
+        HBox controls = new HBox(10, input, insert, delete, search);
 
         canvas = new Pane();
         canvas.setStyle("-fx-border-color: gray; -fx-background-color: white;");
@@ -52,6 +52,17 @@ public class SplayTreeView extends VBox {
                 input.clear();
             } catch (NumberFormatException ex) {
                 showError("Ingresa un numero valido bestia, digo bestie");
+            }
+        });
+
+        search.setOnAction(e -> {
+            try {
+                int value = Integer.parseInt(input.getText());
+                tree.search(value);
+                drawTreeWithHighlight(value);
+                input.clear();
+            } catch (NumberFormatException ex) {
+                showError("Ingrese un numero valido");
             }
         });
     }
@@ -97,4 +108,41 @@ public class SplayTreeView extends VBox {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private void drawTreeWithHighlight(int targetValue) {
+        canvas.getChildren().clear();
+        drawNodeWithHighlight(tree.getRoot(), canvas.getWidth() / 2, 50, canvas.getWidth() / 4, targetValue);
+    }
+
+    private void drawNodeWithHighlight(SplayTreeNode node, double x, double y, double offset, int target) {
+        if (node == null) return;
+
+        node.x = x;
+        node.y = y;
+
+        TreeNodeView nodeView = new TreeNodeView(node.value);
+
+        if (node.value == target) {
+            nodeView.setStyle("-fx-background-color: yellow; -fx-border-color: black; -fx-border-width: 2;");
+        }
+
+        nodeView.setTranslateX(x);
+        nodeView.setTranslateY(y);
+        canvas.getChildren().add(nodeView);
+
+        if (node.left != null) {
+            double childX = x - offset;
+            double childY = y + 80;
+            drawNodeWithHighlight(node.left, childX, childY, offset / 2, target);
+            canvas.getChildren().add(new Line(x + 20, y + 20, childX + 20, childY + 20));
+        }
+
+        if (node.right != null) {
+            double childX = x + offset;
+            double childY = y + 80;
+            drawNodeWithHighlight(node.right, childX, childY, offset / 2, target);
+            canvas.getChildren().add(new Line(x + 20, y + 20, childX + 20, childY + 20));
+        }
+    }
+
 }

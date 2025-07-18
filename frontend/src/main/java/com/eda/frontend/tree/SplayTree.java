@@ -28,6 +28,28 @@ public class SplayTree {
         }
     }
 
+    public SplayTreeNode search(int value) {
+        root = searchAndSplay(root, value);
+        if (root != null && root.value == value) {
+            return root;
+        }
+        return null;
+    }
+
+    private SplayTreeNode searchAndSplay(SplayTreeNode node, int value) {
+        if (node == null || node.value == value) return splay(node, value);
+
+        if (value < node.value) {
+            if (node.left == null) return splay(node, value);
+            node.left = searchAndSplay(node.left, value);
+        } else {
+            if (node.right == null) return splay(node, value);
+            node.right = searchAndSplay(node.right, value);
+        }
+        return splay(node, value);
+    }
+
+
     private SplayTreeNode insert(SplayTreeNode node, int value) {
         if (node == null) return new SplayTreeNode(value);
         if (value < node.value)
