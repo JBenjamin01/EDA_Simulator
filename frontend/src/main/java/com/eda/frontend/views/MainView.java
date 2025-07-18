@@ -28,7 +28,6 @@ public class MainView extends BorderPane {
         menuBox.setStyle("-fx-background-color: #2C3E50;");
         menuBox.setPrefWidth(260);
 
-        // Encabezado centrado
         Label title = new Label("Estructuras de Datos");
         title.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
         title.setMaxWidth(Double.MAX_VALUE);
@@ -36,7 +35,6 @@ public class MainView extends BorderPane {
 
         Separator separator = new Separator();
 
-        // Botones principales
         Button btnBinaryTree = new Button("Árbol Binario");
         Button btnAvlTree = new Button("Árbol AVL");
         Button btnSplayTree = new Button("Árbol Splay");
@@ -47,11 +45,9 @@ public class MainView extends BorderPane {
             btn.setMaxWidth(Double.MAX_VALUE);
         }
 
-        // Botones inferiores con estilos distintos
         Button btnAbout = new Button("Acerca de");
         Button btnExit = new Button("Salir");
 
-        // Estilo para botones inferiores
         btnAbout.setStyle("""
             -fx-background-color: transparent;
             -fx-text-fill: #95A5A6;
@@ -93,28 +89,27 @@ public class MainView extends BorderPane {
             -fx-cursor: hand;
         """));
 
-        // Acciones
         btnBinaryTree.setOnAction(e -> content.getChildren().setAll(new BinaryTreeView()));
         btnAvlTree.setOnAction(e -> content.getChildren().setAll(new AVLTreeView()));
         btnSplayTree.setOnAction(e -> content.getChildren().setAll(new SplayTreeView()));
         btnBTree.setOnAction(e -> content.getChildren().setAll(new BTreeView()));
-        btnAbout.setOnAction(e -> showAboutDialog());
-        btnExit.setOnAction(e -> System.exit(0));
+        btnAbout.setOnAction(e -> content.getChildren().setAll(new AboutView())); // <-- Cambio aquí
+        btnExit.setOnAction(e -> content.getChildren().setAll(buildWelcomeScreen())); // <-- Cambio aquí
 
         VBox topButtons = new VBox(10, title, separator, btnBinaryTree, btnAvlTree, btnSplayTree, btnBTree);
 
-        // Footer siempre pegado al fondo
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        VBox bottomButtons = new VBox(5, btnAbout, btnExit);
+        VBox bottomButtons = new VBox();
+        bottomButtons.setSpacing(15);
         bottomButtons.setAlignment(Pos.CENTER);
         bottomButtons.setPadding(new Insets(10, 0, 0, 0));
+        bottomButtons.getChildren().addAll(btnAbout, btnExit);
 
         menuBox.getChildren().addAll(topButtons, spacer, bottomButtons);
         return menuBox;
     }
-
 
     private StackPane buildWelcomeScreen() {
         VBox welcomeBox = new VBox(15);
@@ -140,21 +135,6 @@ public class MainView extends BorderPane {
         StackPane pane = new StackPane(welcomeBox);
         pane.setStyle("-fx-background-color: #ECF0F1;");
         return pane;
-    }
-
-    private void showAboutDialog() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Acerca del proyecto");
-        alert.setHeaderText("Simulador de Estructuras de Datos");
-        alert.setContentText("""
-            Proyecto educativo desarrollado en JavaFX para simular estructuras como árboles y listas.
-            
-            Universidad: Universidad Nacional de San Agustín
-            Autor: TuNombre
-            Versión: 1.0
-            Año: 2025
-        """);
-        alert.showAndWait();
     }
 
     private void styleMenuButton(Button btn) {
