@@ -12,6 +12,22 @@ public class SplayTree {
         root = splay(root, value);
     }
 
+    public void delete(int value) {
+        root = splay(root, value);
+
+        if (root == null || root.value != value) return;
+
+        if (root.left == null) {
+            root = root.right;
+        } else {
+            SplayTreeNode leftSubtree = root.left;
+            SplayTreeNode rightSubtree = root.right;
+            leftSubtree = splay(leftSubtree, value); // Traer el mayor de la izquierda a la raíz
+            leftSubtree.right = rightSubtree;
+            root = leftSubtree;
+        }
+    }
+
     private SplayTreeNode insert(SplayTreeNode node, int value) {
         if (node == null) return new SplayTreeNode(value);
         if (value < node.value)
@@ -25,35 +41,33 @@ public class SplayTree {
         if (root == null || root.value == value)
             return root;
 
-        // Zig-Zig (Left Left)
-        if (value < root.value && root.left != null && value < root.left.value) {
-            root.left.left = splay(root.left.left, value);
-            root = rotateRight(root);
-        }
+        if (value < root.value) {
+            if (root.left == null) return root;
 
-        // Zig-Zag (Left Right)
-        else if (value < root.value && root.left != null && value > root.left.value) {
-            root.left.right = splay(root.left.right, value);
-            if (root.left.right != null)
-                root.left = rotateLeft(root.left);
-        }
+            if (value < root.left.value) {
+                root.left.left = splay(root.left.left, value);
+                root = rotateRight(root);
+            } else if (value > root.left.value) {
+                root.left.right = splay(root.left.right, value);
+                if (root.left.right != null)
+                    root.left = rotateLeft(root.left);
+            }
 
-        // Zag-Zig (Right Left)
-        else if (value > root.value && root.right != null && value < root.right.value) {
-            root.right.left = splay(root.right.left, value);
-            if (root.right.left != null)
-                root.right = rotateRight(root.right);
-        }
+            return (root.left == null) ? root : rotateRight(root);
+        } else {
+            if (root.right == null) return root;
 
-        // Zag-Zag (Right Right)
-        else if (value > root.value && root.right != null && value > root.right.value) {
-            root.right.right = splay(root.right.right, value);
-            root = rotateLeft(root);
-        }
+            if (value > root.right.value) {
+                root.right.right = splay(root.right.right, value);
+                root = rotateLeft(root);
+            } else if (value < root.right.value) {
+                root.right.left = splay(root.right.left, value);
+                if (root.right.left != null)
+                    root.right = rotateRight(root.right);
+            }
 
-        return (value < root.value && root.left != null) ? rotateRight(root)
-             : (value > root.value && root.right != null) ? rotateLeft(root)
-             : root;
+            return (root.right == null) ? root : rotateLeft(root);
+        }
     }
 
     private SplayTreeNode rotateRight(SplayTreeNode x) {

@@ -21,8 +21,10 @@ public class SplayTreeView extends VBox {
         input.setPromptText("Ingrese valor");
 
         Button insert = new Button("Insertar");
+        Button delete = new Button("Eliminar");
+        
 
-        HBox controls = new HBox(10, input, insert);
+        HBox controls = new HBox(10, input, insert, delete);
 
         canvas = new Pane();
         canvas.setStyle("-fx-border-color: gray; -fx-background-color: white;");
@@ -39,6 +41,17 @@ public class SplayTreeView extends VBox {
                 input.clear();
             } catch (NumberFormatException ex) {
                 showError("Ingrese un número válido");
+            }
+        });
+
+        delete.setOnAction(e -> {
+            try {
+                int value = Integer.parseInt(input.getText());
+                tree.delete(value);
+                drawTree();
+                input.clear();
+            } catch (NumberFormatException ex) {
+                showError("Ingresa un numero valido bestia, digo bestie");
             }
         });
     }
