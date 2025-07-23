@@ -44,7 +44,7 @@ FRONTEND
 4. Levantar frontend Rama main
 > java -version
 Actualizar java: https://www.oracle.com/java/technologies/javase/jdk22-archive-downloads.html
-> ./gradlew jproRun
+> ./gradlew jproRun (Linux)   gradlew.bat jproRun (windows)
 
 urls:
 http://localhost:8080/swagger-ui/index.html
@@ -57,42 +57,44 @@ en la copia de trabajo de 'frontend/eslint.config.js', LF será reemplazado por 
 ESTRUCTURA
 
 FRONTEND
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\.gradle\
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\bin\
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\build\
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\gradle\
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\logs\
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\tmp\
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\.gradle\
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\bin\
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\build\
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\gradle\
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\logs\
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\tmp\
 
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\components\BTreeNodeView.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\components\TreeNodeView.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\AVLTree.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\AVLTreeNode.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\BinaryTree.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\BinaryTreeNode.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\BTree.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\BTreeNode.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\SplayTree.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\SplayTreeNode.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\components\BTreeNodeView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\components\TreeNodeView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\AVLTree.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\AVLTreeNode.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\BinaryTree.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\BinaryTreeNode.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\BTree.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\BTreeNode.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\SplayTree.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\tree\SplayTreeNode.java
 
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\AboutView.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\AVLTreeView.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\BinaryTreeView.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\BTreeView.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\ListViewPanel.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\MainView.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\QueueView.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\SplayTreeView.java
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\StackView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\AboutView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\AVLTreeView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\BinaryTreeView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\BTreeView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\ListViewPanel.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\MainView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\QueueView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\SplayTreeView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\views\StackView.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\JavaFXApp.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\java\com\eda\frontend\Main.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\src\main\resources\icons\eda.jpg
 
-
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\build.grandle
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\gradlew
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\gradlew.bat
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\package-lock.json
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\RUNNING_PID
-C:\Users\TIJERO\Desktop\EDA_Simulator2\EDA_Simulator\frontend\settings.gradle
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\build.grandle
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\gradlew
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\gradlew.bat
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\package-lock.json
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\RUNNING_PID
+C:\Users\TIJERO\Desktop\EDA_Simulator\frontend\settings.gradle
 
 BACKEND
 C:\Users\TIJERO\Desktop\EDA_Simulator\backend\.mvn\wrapper\maven-wrapper.properties
