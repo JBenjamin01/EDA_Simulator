@@ -1,33 +1,94 @@
 Para funcionamiento de proyecto EDA_Simulator..
 
-REM eda_simulator en minúscula porque no reconoce la bd
 
-1.Tener todo lo necesario instalado 
+1.Tener todo lo necesario instalado
 
-2.modificar contraseña de postgres
+2.modificar contraseña de tu postgres
+
 
 3.Preparar y correr el backend (Spring Boot + PostgreSQL)
+> psql -U postgres
+> create database eda_simulator;
 
-en bash
-psql -U postgres
+> cd backend
+> java -versión
+> mvn -v
+// Download Maven Apache
+// añadir path en variables de entorno
+// C:\Program Files\Maven\apache-maven-3.9.11\bin
+// Spring Boot no necesita instalarse manualmente, se ejecuta desde Maven.
 
-ya en SQLshell
-CREATE DATABASE EDA_Simulator;
+> cd backend
 
-desde consola:
-cd backend
-./mvnw spring-boot:run   o   mvnw.cmd spring-boot:run
+Compilar Backend
+// Downloaded Maven
+> mvn clean install
 
-4.Levantar el frontend (React + Vite)
-cd frontend
-npm install  # Solo si es la primera vez o si hay cambios en package.json
-npm run dev
+// Si NO tienes Maven instalado (usa el wrapper que viene con el proyecto)
+// > ./mvnw clean install      # En Linux/macOS
+> mvnw.cmd clean install    # En Windows
 
-Instalación de Swagger (ya esta instalada la dependencia)
-agregar <dependency>
-./mvnw clean install
-./mvnw spring-boot:run
+Ejecutar Backend
+> ./mvnw spring-boot:run   o   mvnw.cmd spring-boot:run  o  java -jar target/backend-0.0.1-SNAPSHOT.jar
+// puerto 8080 por defecto, o cámbialo en :
+// > cd EDA_Simulator\backend\src\main\resources\application.properties
+// server.port=8149
 
-urls por el momento
+
+
+FRONTEND
+
+4. Levantar frontend Rama main
+> java -version
+Actualizar java: https://www.oracle.com/java/technologies/javase/jdk22-archive-downloads.html
+> ./gradlew jproRun
+
+urls:
 http://localhost:8080/swagger-ui/index.html
-http://localhost:5173/
+
+git:
+en la copia de trabajo de 'frontend/eslint.config.js', LF será reemplazado por CRLF la próxima vez que Git lo toque
+
+
+
+BACKEND
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\.mvn\wrapper\maven-wrapper.properties
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\BackendApplication.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\config\WebConfig.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\controller\BTreeController.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\model\BTree.java
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\java\com\eda\backend\model\BTreeNode.java
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\main\resources\application.properties
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\src\test\java\com\eda\backend\BackendApplicationTest.java
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\classes\com\eda\backend\BackendApplication.class
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\classes\application.properties
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\generated-sources\annotations\
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\generated-test-sources\test-annotations\
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\maven-archiver\pom.properties
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\maven-status\maven-compiler-plugin\compile\default-compile\createdFile.lst
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\maven-status\maven-compiler-plugin\compile\default-compile\inputFiles.lst
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\maven-status\maven-compiler-plugin\testCompile\default-testCompile\createdFiles.lst
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\maven-status\maven-compiler-plugin\testCompile\default-testCompile\inputFiles.lst
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\surefire-reports\com.eda.backend.BackendApplicationTests.txt
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\surefire-reports\TEST-com.eda.backend.BackendApplicationTests.xml
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\test-classes\com\eda\backend\BackendApplicationTest.class
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\backend-0.0.1-SNAPSHOT.jar
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\target\backend-0.0.1-SNAPSHOT.jar.original
+
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\.gitattributes
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\.gitignore
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\mvnw
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\mvnw.cmd
+C:\Users\TIJERO\Desktop\EDA_Simulator\backend\pom.xml
+
