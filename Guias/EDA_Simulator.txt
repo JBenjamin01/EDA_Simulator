@@ -44,7 +44,7 @@ FRONTEND
 4. Levantar frontend Rama main
 > java -version
 Actualizar java: https://www.oracle.com/java/technologies/javase/jdk22-archive-downloads.html
-> ./gradlew jproRun (Linux)   gradlew.bat jproRun (windows)
+> ./gradlew jproRun (Linux)   .\gradlew.bat jproRun (windows)
 
 urls:
 http://localhost:8080/swagger-ui/index.html

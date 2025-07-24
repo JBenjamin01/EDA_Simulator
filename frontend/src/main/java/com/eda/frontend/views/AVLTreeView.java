@@ -3,9 +3,11 @@ package com.eda.frontend.views;
 import com.eda.frontend.components.TreeNodeView;
 import com.eda.frontend.tree.AVLTree;
 import com.eda.frontend.tree.AVLTreeNode;
+import javafx.animation.FadeTransition;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
+import javafx.util.Duration;
 
 public class AVLTreeView extends VBox {
 
@@ -78,24 +80,31 @@ public class AVLTreeView extends VBox {
         node.x = x;
         node.y = y;
 
-        TreeNodeView nodeView = new TreeNodeView(node.value);
-        nodeView.setTranslateX(x);
-        nodeView.setTranslateY(y);
-        canvas.getChildren().add(nodeView);
-
         if (node.left != null) {
             double childX = x - offset;
             double childY = y + 80;
             drawNode(node.left, childX, childY, offset / 2);
-            canvas.getChildren().add(new Line(x + 20, y + 20, childX + 20, childY + 20));
+            Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
+            canvas.getChildren().add(0, line); // Línea detrás
         }
 
         if (node.right != null) {
             double childX = x + offset;
             double childY = y + 80;
             drawNode(node.right, childX, childY, offset / 2);
-            canvas.getChildren().add(new Line(x + 20, y + 20, childX + 20, childY + 20));
+            Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
+            canvas.getChildren().add(0, line); // Línea detrás
         }
+
+        TreeNodeView nodeView = new TreeNodeView(node.value);
+        nodeView.setTranslateX(x);
+        nodeView.setTranslateY(y);
+        canvas.getChildren().add(nodeView);
+
+        FadeTransition ft = new FadeTransition(Duration.millis(300), nodeView);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
     }
 
     private void drawTreeWithHighlight(int target) {
@@ -109,29 +118,34 @@ public class AVLTreeView extends VBox {
         node.x = x;
         node.y = y;
 
-        TreeNodeView nodeView = new TreeNodeView(node.value);
-
-        if (node.value == target) {
-            nodeView.setStyle("-fx-background-color: yellow; -fx-border-color: black;");
-        }
-
-        nodeView.setTranslateX(x);
-        nodeView.setTranslateY(y);
-        canvas.getChildren().add(nodeView);
-
         if (node.left != null) {
             double childX = x - offset;
             double childY = y + 80;
             drawNodeWithHighlight(node.left, childX, childY, offset / 2, target);
-            canvas.getChildren().add(new Line(x + 20, y + 20, childX + 20, childY + 20));
+            Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
+            canvas.getChildren().add(0, line); // Línea detrás
         }
 
         if (node.right != null) {
             double childX = x + offset;
             double childY = y + 80;
             drawNodeWithHighlight(node.right, childX, childY, offset / 2, target);
-            canvas.getChildren().add(new Line(x + 20, y + 20, childX + 20, childY + 20));
+            Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
+            canvas.getChildren().add(0, line); // Línea detrás
         }
+
+        TreeNodeView nodeView = new TreeNodeView(node.value);
+        if (node.value == target) {
+            nodeView.setStyle("-fx-background-color: yellow; -fx-border-color: black;");
+        }
+        nodeView.setTranslateX(x);
+        nodeView.setTranslateY(y);
+        canvas.getChildren().add(nodeView);
+
+        FadeTransition ft = new FadeTransition(Duration.millis(300), nodeView);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
     }
 
     private void showError(String mensaje) {
