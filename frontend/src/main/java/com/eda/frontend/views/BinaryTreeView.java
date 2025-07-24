@@ -1,9 +1,13 @@
 package com.eda.frontend.views;
 
+import java.util.List;
+
 import com.eda.frontend.components.TreeNodeView;
 import com.eda.frontend.tree.BinaryTree;
 import com.eda.frontend.tree.BinaryTreeNode;
 import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -16,6 +20,7 @@ public class BinaryTreeView extends VBox {
     private final BinaryTree tree;
     private final TextField input;
     private final Button insert, delete, search;
+    private final TextArea logArea;
 
     public BinaryTreeView() {
         setSpacing(10);
@@ -56,6 +61,17 @@ public class BinaryTreeView extends VBox {
         canvas.setPrefWidth(900);
 
         getChildren().addAll(title, controls, canvas);
+
+        logArea = new TextArea();
+        logArea.setEditable(false);
+        logArea.setWrapText(true);
+        logArea.setPrefHeight(120);
+        logArea.setStyle("-fx-font-family: 'monospace'; -fx-font-size: 13px;");
+        getChildren().add(logArea);
+    }
+
+    private void logStep(String message) {
+        logArea.appendText(message + "\n");
     }
 
     private Button styledButton(String text) {
@@ -92,9 +108,54 @@ public class BinaryTreeView extends VBox {
     private void handleInsert() {
         try {
             int value = Integer.parseInt(input.getText());
-            tree.insert(value);
-            drawTree();
             input.clear();
+            logArea.clear();
+
+            List<BinaryTreeNode> path = tree.getSearchPath(value);
+            BinaryTreeNode insertParent = path.isEmpty() ? null : path.get(path.size() - 1);
+
+            SequentialTransition animation = new SequentialTransition();
+            logStep("Iniciando inserción del valor " + value);
+
+            for (BinaryTreeNode node : path) {
+                TreeNodeView nodeView = new TreeNodeView(node.value);
+                nodeView.setTranslateX(node.x);
+                nodeView.setTranslateY(node.y);
+                canvas.getChildren().add(nodeView);
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(1));
+                pause.setOnFinished(e -> {
+                    nodeView.setStyle("-fx-background-color: yellow; -fx-border-color: black;");
+                    logStep("Visitando nodo con valor " + node.value);
+                });
+                animation.getChildren().add(pause);
+            }
+
+            // Agregar una pausa final antes de insertar
+            animation.setOnFinished(e -> {
+                if (!path.isEmpty()) {
+                    logStep("Posición de inserción determinada después del nodo: " + insertParent.value);
+
+                    PauseTransition pauseBeforeInsert = new PauseTransition(Duration.seconds(1));
+                    pauseBeforeInsert.setOnFinished(ev -> {
+                        tree.insert(value);
+                        drawTree();
+                        logStep("Valor insertado: " + value);
+                    });
+                    pauseBeforeInsert.play();
+                } else {
+                    // Árbol vacío, insertamos directamente con pausa
+                    PauseTransition pauseInsertRoot = new PauseTransition(Duration.seconds(1));
+                    pauseInsertRoot.setOnFinished(ev -> {
+                        tree.insert(value);
+                        drawTree();
+                        logStep("Valor insertado como raíz: " + value);
+                    });
+                    pauseInsertRoot.play();
+                }
+            });
+
+            animation.play();
         } catch (NumberFormatException ex) {
             showError("Ingrese un número válido");
         }
@@ -103,22 +164,105 @@ public class BinaryTreeView extends VBox {
     private void handleDelete() {
         try {
             int value = Integer.parseInt(input.getText());
-            tree.delete(value);
-            drawTree();
             input.clear();
+            logArea.clear();
+
+            List<BinaryTreeNode> path = tree.getSearchPath(value);
+            BinaryTreeNode foundNode = path.isEmpty() || path.get(path.size() - 1).value != value ? null : path.get(path.size() - 1);
+
+            SequentialTransition animation = new SequentialTransition();
+            logStep("Iniciando búsqueda para eliminación del valor " + value);
+
+            for (BinaryTreeNode node : path) {
+                TreeNodeView nodeView = new TreeNodeView(node.value);
+                nodeView.setTranslateX(node.x);
+                nodeView.setTranslateY(node.y);
+                canvas.getChildren().add(nodeView);
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(1));
+                pause.setOnFinished(e -> {
+                    if (node == foundNode) {
+                        nodeView.setStyle("-fx-background-color: red; -fx-border-color: black; -fx-border-width: 3px;");
+                        logStep("Nodo a eliminar encontrado: " + node.value);
+                    } else {
+                        nodeView.setStyle("-fx-background-color: yellow; -fx-border-color: black;");
+                        logStep("Visitando nodo con valor " + node.value);
+                    }
+                });
+                animation.getChildren().add(pause);
+            }
+
+            animation.setOnFinished(e -> {
+                if (foundNode == null) {
+                    logStep("Valor no encontrado. No se puede eliminar.");
+                } else {
+                    PauseTransition pauseBeforeDelete = new PauseTransition(Duration.seconds(1));
+                    pauseBeforeDelete.setOnFinished(ev -> {
+                        logStep("Eliminando nodo: " + value);
+                        tree.delete(value);
+                        drawTree();
+                        logStep("Nodo eliminado y árbol actualizado.");
+                    });
+                    pauseBeforeDelete.play();
+                }
+            });
+
+            animation.play();
+
         } catch (NumberFormatException ex) {
             showError("Ingrese un número válido");
         }
     }
 
+
     private void handleSearch() {
         try {
             int value = Integer.parseInt(input.getText());
-            drawTreeWithHighlight(value);
             input.clear();
+            drawTree();
+            logArea.clear();
+
+            List<BinaryTreeNode> path = tree.getSearchPath(value);
+            BinaryTreeNode foundNode = path.isEmpty() || path.get(path.size() - 1).value != value ? null : path.get(path.size() - 1);
+
+            animateSearchPath(path, foundNode, value);
         } catch (NumberFormatException ex) {
             showError("Ingrese un número válido");
         }
+    }
+
+    private void animateSearchPath(List<BinaryTreeNode> path, BinaryTreeNode foundNode, int target) {
+        SequentialTransition animation = new SequentialTransition();
+        logStep("Iniciando búsqueda del valor " + target);
+
+        for (BinaryTreeNode node : path) {
+            TreeNodeView nodeView = new TreeNodeView(node.value);
+            nodeView.setTranslateX(node.x);
+            nodeView.setTranslateY(node.y);
+            canvas.getChildren().add(nodeView);
+
+            PauseTransition pause = new PauseTransition(Duration.seconds(1));
+            pause.setOnFinished(e -> {
+                if (node == foundNode) {
+                    nodeView.setStyle("-fx-background-color: green; -fx-border-color: black; -fx-border-width: 3px;");
+                    logStep("Nodo encontrado: " + node.value);
+                } else {
+                    nodeView.setStyle("-fx-background-color: yellow; -fx-border-color: black;");
+                    logStep("Visitando nodo con valor " + node.value);
+                }
+            });
+            animation.getChildren().add(pause);
+        }
+
+        animation.setOnFinished(e -> {
+            if (foundNode == null) {
+                logStep("Valor no encontrado.");
+            } else {
+                logStep("Valor encontrado: " + target);
+            }
+        });
+
+        animation.play();
     }
 
     private void drawTree() {

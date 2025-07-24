@@ -94,7 +94,7 @@ public class MainView extends BorderPane {
         """);
         listTitle.setPadding(new Insets(10, 0, 0, 10));
 
-        Button btnListStackQueue = new Button("Listas, Pilas y Colas");
+        Button btnListStackQueue = new Button("Listas, Pilas, Colas...");
         styleMenuButton(btnListStackQueue);
         btnListStackQueue.setMaxWidth(Double.MAX_VALUE);
         btnListStackQueue.setOnAction(e -> {
@@ -183,7 +183,7 @@ public class MainView extends BorderPane {
 
         // Logo actualizado
         ImageView logo = new ImageView(new Image(getClass().getResource("/icons/eda.png").toExternalForm()));
-        logo.setFitWidth(540);
+        logo.setFitWidth(500);
         logo.setPreserveRatio(true);
 
         // Separación visual entre logo y texto

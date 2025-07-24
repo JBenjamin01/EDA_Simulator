@@ -1,5 +1,8 @@
 package com.eda.frontend.tree;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BinaryTree {
 
     private BinaryTreeNode root;
@@ -64,5 +67,29 @@ public class BinaryTree {
             node = node.left;
         }
         return node.value;
+    }
+
+    public BinaryTreeNode search(int value) {
+        return searchRecursive(root, value);
+    }
+
+    private BinaryTreeNode searchRecursive(BinaryTreeNode node, int value) {
+        if (node == null || node.value == value) return node;
+        if (value < node.value) return searchRecursive(node.left, value);
+        return searchRecursive(node.right, value);
+    }
+
+    public List<BinaryTreeNode> getSearchPath(int value) {
+        List<BinaryTreeNode> path = new ArrayList<>();
+        BinaryTreeNode current = root;
+
+        while (current != null) {
+            path.add(current);
+            if (value == current.value) break;
+            else if (value < current.value) current = current.left;
+            else current = current.right;
+        }
+
+        return path;
     }
 }
