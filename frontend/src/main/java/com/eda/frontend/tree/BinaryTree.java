@@ -92,4 +92,18 @@ public class BinaryTree {
 
         return path;
     }
+
+    public List<BinaryTreeNode> inOrderTraversal() {
+        List<BinaryTreeNode> result = new ArrayList<>();
+        inOrderHelper(root, result);
+        return result;
+    }
+
+    private void inOrderHelper(BinaryTreeNode node, List<BinaryTreeNode> result) {
+        if (node != null) {
+            inOrderHelper(node.left, result);
+            result.add(node);
+            inOrderHelper(node.right, result);
+        }
+    }
 }

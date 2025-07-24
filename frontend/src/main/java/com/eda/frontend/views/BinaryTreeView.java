@@ -19,7 +19,7 @@ public class BinaryTreeView extends VBox {
     private final Pane canvas;
     private final BinaryTree tree;
     private final TextField input;
-    private final Button insert, delete, search;
+    private final Button insert, delete, search, inOrder;
     private final TextArea logArea;
 
     public BinaryTreeView() {
@@ -47,12 +47,14 @@ public class BinaryTreeView extends VBox {
         insert = styledButton("Insertar");
         delete = styledButton("Eliminar");
         search = styledButton("Buscar");
+        inOrder = styledButton("Recorrer InOrden");
 
         insert.setOnAction(e -> handleInsert());
         delete.setOnAction(e -> handleDelete());
         search.setOnAction(e -> handleSearch());
+        inOrder.setOnAction(e -> handleInOrderTraversal());
 
-        HBox controls = new HBox(10, input, insert, delete, search);
+        HBox controls = new HBox(10, input, insert, delete, search, inOrder);
         controls.setPadding(new Insets(10));
 
         canvas = new Pane();
@@ -230,6 +232,35 @@ public class BinaryTreeView extends VBox {
             showError("Ingrese un número válido");
         }
     }
+
+    private void handleInOrderTraversal() {
+        List<BinaryTreeNode> traversal = tree.inOrderTraversal();
+
+        logArea.clear();
+        drawTree();
+        logStep("Iniciando recorrido InOrden...");
+
+        SequentialTransition animation = new SequentialTransition();
+
+        for (BinaryTreeNode node : traversal) {
+            TreeNodeView nodeView = new TreeNodeView(node.value);
+            nodeView.setTranslateX(node.x);
+            nodeView.setTranslateY(node.y);
+            canvas.getChildren().add(nodeView);
+
+            PauseTransition pause = new PauseTransition(Duration.seconds(1));
+            pause.setOnFinished(e -> {
+                nodeView.setStyle("-fx-background-color: lightgreen; -fx-border-color: green; -fx-border-width: 2px;");
+                logStep("Visitando nodo: " + node.value);
+            });
+
+            animation.getChildren().add(pause);
+        }
+
+        animation.setOnFinished(e -> logStep("Recorrido InOrden finalizado."));
+        animation.play();
+    }
+
 
     private void animateSearchPath(List<BinaryTreeNode> path, BinaryTreeNode foundNode, int target) {
         SequentialTransition animation = new SequentialTransition();
