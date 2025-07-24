@@ -4,6 +4,8 @@ import com.eda.frontend.components.TreeNodeView;
 import com.eda.frontend.tree.AVLTree;
 import com.eda.frontend.tree.AVLTreeNode;
 import javafx.animation.FadeTransition;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
@@ -13,60 +15,114 @@ public class AVLTreeView extends VBox {
 
     private final Pane canvas;
     private final AVLTree tree;
+    private final TextField input;
+    private final Button insert, delete, search;
 
     public AVLTreeView() {
-        setSpacing(10);
+        this.setSpacing(10);
+        this.setPadding(new Insets(20));
+        this.setStyle("-fx-background-color: #ECF0F1;");
+
         tree = new AVLTree();
 
         Label title = new Label("Simulador de Árbol AVL");
-        TextField input = new TextField();
-        input.setPromptText("Ingrese valor");
+        title.setStyle("-fx-font-size: 20px; -fx-text-fill: #2C3E50;");
+        title.setMaxWidth(Double.MAX_VALUE);
 
-        Button insert = new Button("Insertar");
-        Button delete = new Button("Eliminar");
-        Button search = new Button("Buscar");
+        input = new TextField();
+        input.setPromptText("Ingrese valor");
+        input.setPrefWidth(160);
+        input.setStyle("""
+            -fx-font-size: 14px;
+            -fx-background-radius: 8;
+            -fx-border-radius: 8;
+            -fx-border-color: #BDC3C7;
+            -fx-padding: 8;
+        """);
+
+        insert = styledButton("Insertar");
+        delete = styledButton("Eliminar");
+        search = styledButton("Buscar");
+
+        // Acciones de los botones
+        insert.setOnAction(e -> handleInsert());
+        delete.setOnAction(e -> handleDelete());
+        search.setOnAction(e -> handleSearch());
 
         HBox controls = new HBox(10, input, insert, delete, search);
+ 
+        controls.setPadding(new Insets(10));
 
         canvas = new Pane();
-        canvas.setStyle("-fx-border-color: gray; -fx-background-color: white;");
+        canvas.setStyle("-fx-border-color: #BDC3C7; -fx-background-color: white;");
         canvas.setPrefHeight(500);
-        canvas.setPrefWidth(800);
+        canvas.setPrefWidth(900);
 
         getChildren().addAll(title, controls, canvas);
+    }
 
-        insert.setOnAction(e -> {
-            try {
-                int value = Integer.parseInt(input.getText());
-                tree.insert(value);
-                drawTree();
-                input.clear();
-            } catch (NumberFormatException ex) {
-                showError("Ingrese un número válido");
-            }
-        });
+    private Button styledButton(String text) {
+        Button btn = new Button(text);
+        btn.setStyle("""
+            -fx-background-color: #3498DB;
+            -fx-text-fill: white;
+            -fx-font-size: 14px;
+            -fx-background-radius: 8;
+            -fx-cursor: hand;
+            -fx-padding: 8 16;
+        """);
 
-        delete.setOnAction(e -> {
-            try {
-                int value = Integer.parseInt(input.getText());
-                tree.delete(value);
-                drawTree();
-                input.clear();
-            } catch (NumberFormatException ex) {
-                showError("Ingrese un número válido");
-            }
-        });
+        btn.setOnMouseEntered(e -> btn.setStyle("""
+            -fx-background-color: #2980B9;
+            -fx-text-fill: white;
+            -fx-font-size: 14px;
+            -fx-background-radius: 8;
+            -fx-cursor: hand;
+            -fx-padding: 8 16;
+        """));
+        btn.setOnMouseExited(e -> btn.setStyle("""
+            -fx-background-color: #3498DB;
+            -fx-text-fill: white;
+            -fx-font-size: 14px;
+            -fx-background-radius: 8;
+            -fx-cursor: hand;
+            -fx-padding: 8 16;
+        """));
 
-        search.setOnAction(e -> {
-            try {
-                int value = Integer.parseInt(input.getText());
-                tree.search(value);
-                drawTreeWithHighlight(value);
-                input.clear();
-            } catch (NumberFormatException ex) {
-                showError("Ingrese un número válido");
-            }
-        });
+        return btn;
+    }
+
+    private void handleInsert() {
+        try {
+            int value = Integer.parseInt(input.getText());
+            tree.insert(value);
+            drawTree();
+            input.clear();
+        } catch (NumberFormatException ex) {
+            showError("Ingrese un número válido");
+        }
+    }
+
+    private void handleDelete() {
+        try {
+            int value = Integer.parseInt(input.getText());
+            tree.delete(value);
+            drawTree();
+            input.clear();
+        } catch (NumberFormatException ex) {
+            showError("Ingrese un número válido");
+        }
+    }
+
+    private void handleSearch() {
+        try {
+            int value = Integer.parseInt(input.getText());
+            tree.search(value);
+            drawTreeWithHighlight(value);
+            input.clear();
+        } catch (NumberFormatException ex) {
+            showError("Ingrese un número válido");
+        }
     }
 
     private void drawTree() {
@@ -85,7 +141,7 @@ public class AVLTreeView extends VBox {
             double childY = y + 80;
             drawNode(node.left, childX, childY, offset / 2);
             Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
-            canvas.getChildren().add(0, line); // Línea detrás
+            canvas.getChildren().add(0, line);
         }
 
         if (node.right != null) {
@@ -93,7 +149,7 @@ public class AVLTreeView extends VBox {
             double childY = y + 80;
             drawNode(node.right, childX, childY, offset / 2);
             Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
-            canvas.getChildren().add(0, line); // Línea detrás
+            canvas.getChildren().add(0, line);
         }
 
         TreeNodeView nodeView = new TreeNodeView(node.value);
@@ -123,7 +179,7 @@ public class AVLTreeView extends VBox {
             double childY = y + 80;
             drawNodeWithHighlight(node.left, childX, childY, offset / 2, target);
             Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
-            canvas.getChildren().add(0, line); // Línea detrás
+            canvas.getChildren().add(0, line);
         }
 
         if (node.right != null) {
@@ -131,7 +187,7 @@ public class AVLTreeView extends VBox {
             double childY = y + 80;
             drawNodeWithHighlight(node.right, childX, childY, offset / 2, target);
             Line line = new Line(x + 20, y + 20, childX + 20, childY + 20);
-            canvas.getChildren().add(0, line); // Línea detrás
+            canvas.getChildren().add(0, line);
         }
 
         TreeNodeView nodeView = new TreeNodeView(node.value);

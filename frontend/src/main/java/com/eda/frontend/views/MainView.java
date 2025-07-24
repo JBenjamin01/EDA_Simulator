@@ -12,6 +12,7 @@ public class MainView extends BorderPane {
 
     private final VBox menu;
     private final StackPane content;
+    private Button selectedButton = null;
 
     public MainView() {
         menu = buildMenu();
@@ -43,6 +44,13 @@ public class MainView extends BorderPane {
         for (Button btn : new Button[]{btnBinaryTree, btnAvlTree, btnSplayTree, btnBTree}) {
             styleMenuButton(btn);
             btn.setMaxWidth(Double.MAX_VALUE);
+            btn.setOnAction(e -> {
+                updateSelectedButton(btn);
+                if (btn == btnBinaryTree) content.getChildren().setAll(new BinaryTreeView());
+                else if (btn == btnAvlTree) content.getChildren().setAll(new AVLTreeView());
+                else if (btn == btnSplayTree) content.getChildren().setAll(new SplayTreeView());
+                else if (btn == btnBTree) content.getChildren().setAll(new BTreeView());
+            });
         }
 
         Button btnAbout = new Button("Acerca de");
@@ -89,12 +97,15 @@ public class MainView extends BorderPane {
             -fx-cursor: hand;
         """));
 
-        btnBinaryTree.setOnAction(e -> content.getChildren().setAll(new BinaryTreeView()));
-        btnAvlTree.setOnAction(e -> content.getChildren().setAll(new AVLTreeView()));
-        btnSplayTree.setOnAction(e -> content.getChildren().setAll(new SplayTreeView()));
-        btnBTree.setOnAction(e -> content.getChildren().setAll(new BTreeView()));
-        btnAbout.setOnAction(e -> content.getChildren().setAll(new AboutView())); // <-- Cambio aquí
-        btnExit.setOnAction(e -> content.getChildren().setAll(buildWelcomeScreen())); // <-- Cambio aquí
+        btnAbout.setOnAction(e -> {
+            updateSelectedButton(null);
+            content.getChildren().setAll(new AboutView());
+        });
+
+        btnExit.setOnAction(e -> {
+            updateSelectedButton(null);
+            content.getChildren().setAll(buildWelcomeScreen());
+        });
 
         VBox topButtons = new VBox(10, title, separator, btnBinaryTree, btnAvlTree, btnSplayTree, btnBTree);
 
@@ -109,6 +120,21 @@ public class MainView extends BorderPane {
 
         menuBox.getChildren().addAll(topButtons, spacer, bottomButtons);
         return menuBox;
+    }
+
+    private void updateSelectedButton(Button newSelected) {
+        if (selectedButton != null) {
+            styleMenuButton(selectedButton);
+        }
+        selectedButton = newSelected;
+        if (selectedButton != null) {
+            selectedButton.setStyle("""
+                -fx-background-color: #1ABC9C;
+                -fx-text-fill: white;
+                -fx-font-size: 14px;
+                -fx-cursor: hand;
+            """);
+        }
     }
 
     private StackPane buildWelcomeScreen() {
@@ -150,11 +176,15 @@ public class MainView extends BorderPane {
             -fx-font-size: 14px;
             -fx-cursor: hand;
         """));
-        btn.setOnMouseExited(e -> btn.setStyle("""
-            -fx-background-color: #3498DB;
-            -fx-text-fill: white;
-            -fx-font-size: 14px;
-            -fx-cursor: hand;
-        """));
+        btn.setOnMouseExited(e -> {
+            if (btn != selectedButton) {
+                btn.setStyle("""
+                    -fx-background-color: #3498DB;
+                    -fx-text-fill: white;
+                    -fx-font-size: 14px;
+                    -fx-cursor: hand;
+                """);
+            }
+        });
     }
 }
