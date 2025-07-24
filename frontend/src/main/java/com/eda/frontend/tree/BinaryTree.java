@@ -27,7 +27,42 @@ public class BinaryTree {
     }
 
     public void delete(int value) {
-      // TODO Auto-generated method stub
-      throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        root = deleteRecursive(root, value);
+    }
+
+    private BinaryTreeNode deleteRecursive(BinaryTreeNode current, int value) {
+        if (current == null) {
+            return null;
+        }
+
+        if (value < current.value) {
+            current.left = deleteRecursive(current.left, value);
+        } else if (value > current.value) {
+            current.right = deleteRecursive(current.right, value);
+        } else {
+            // Nodo encontrado
+            if (current.left == null && current.right == null) {
+                return null; // sin hijos
+            }
+            if (current.left == null) {
+                return current.right; // un hijo derecho
+            }
+            if (current.right == null) {
+                return current.left; // un hijo izquierdo
+            }
+            // dos hijos
+            int smallestValue = findMin(current.right);
+            current.value = smallestValue;
+            current.right = deleteRecursive(current.right, smallestValue);
+        }
+
+        return current;
+    }
+
+    private int findMin(BinaryTreeNode node) {
+        while (node.left != null) {
+            node = node.left;
+        }
+        return node.value;
     }
 }
