@@ -126,30 +126,45 @@ public class MainView extends BorderPane {
     }
 
     private StackPane buildWelcomeScreen() {
-        VBox welcomeBox = new VBox(15);
+        VBox welcomeBox = new VBox(20);
         welcomeBox.setAlignment(Pos.CENTER);
-        welcomeBox.setPadding(new Insets(40));
+        welcomeBox.setPadding(new Insets(60));
 
-        Label title = new Label("Simulador de Estructuras de Datos");
-        title.setFont(Font.font("Arial", 28));
-        title.setStyle("-fx-text-fill: #2C3E50;");
+        // Logo actualizado
+        ImageView logo = new ImageView(new Image(getClass().getResource("/icons/eda.png").toExternalForm()));
+        logo.setFitWidth(570);
+        logo.setPreserveRatio(true);
 
-        Label subtitle = new Label("¡Explora, aprende e interactúa con estructuras como árboles y listas!");
-        subtitle.setStyle("-fx-text-fill: #555555; -fx-font-size: 16px;");
+        // Separación visual entre logo y texto
+        Region spacer = new Region();
+        spacer.setMinHeight(15);
 
-        Label hint = new Label("Selecciona una estructura desde el menú izquierdo para comenzar.");
-        hint.setStyle("-fx-text-fill: #777777; -fx-font-size: 14px;");
+        // Título principal
+        Label title = new Label("¡Bienvenido a EDA Simulator!");
+        title.setFont(Font.font("Arial", 40));
+        title.setStyle("-fx-text-fill: #2C3E50; -fx-font-weight: bold;");
 
-        ImageView icon = new ImageView(new Image(getClass().getResource("/icons/eda.jpg").toExternalForm()));
-        icon.setFitWidth(120);
-        icon.setFitHeight(120);
+        // Descripción clara y centrada
+        Label description = new Label("""
+            Una herramienta visual e interactiva diseñada para facilitar la comprensión 
+            y simulación de estructuras de datos complejas como árboles binarios, AVL, 
+            Splay y B. Ideal para estudiantes y entusiastas de la informática.
+        """);
+        description.setWrapText(true);
+        description.setMaxWidth(700);
+        description.setStyle("-fx-text-fill: #555555; -fx-font-size: 18px; -fx-alignment: center;");
 
-        welcomeBox.getChildren().addAll(icon, title, subtitle, hint);
+        // Instrucción final
+        Label hint = new Label("Usa el menú de la izquierda para comenzar con una estructura.");
+        hint.setStyle("-fx-text-fill: #777777; -fx-font-size: 16px;");
+
+        welcomeBox.getChildren().addAll(logo, spacer, title, description, hint);
 
         StackPane pane = new StackPane(welcomeBox);
         pane.setStyle("-fx-background-color: #ECF0F1;");
         return pane;
     }
+
 
     private void styleMenuButton(Button btn) {
         btn.setStyle("""
