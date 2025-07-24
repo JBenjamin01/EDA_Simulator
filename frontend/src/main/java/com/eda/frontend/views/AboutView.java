@@ -35,7 +35,7 @@ public class AboutView extends VBox {
         course.setFont(Font.font("Arial", 16));
 
         // Docente
-        Label teacher = new Label("Docente: Ing. Roni Guillermo Apaza Aceituno");
+        Label teacher = new Label("Docente: Msc. Roni Guillermo Apaza Aceituno");
         teacher.setFont(Font.font("Arial", 16));
 
         // Semestre

@@ -30,9 +30,19 @@ public class MainView extends BorderPane {
         menuBox.setPrefWidth(260);
 
         Label title = new Label("Estructuras de Datos");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
+        title.setStyle("""
+            -fx-text-fill: white;
+            -fx-font-size: 20px;
+            -fx-font-weight: bold;
+            -fx-cursor: hand;
+        """);
         title.setMaxWidth(Double.MAX_VALUE);
         title.setAlignment(Pos.CENTER);
+
+        title.setOnMouseClicked(e -> {
+            updateSelectedButton(null);
+            content.getChildren().setAll(buildWelcomeScreen());
+        });
 
         Separator separator = new Separator();
 
@@ -53,58 +63,36 @@ public class MainView extends BorderPane {
             });
         }
 
-        Button btnAbout = new Button("Acerca de");
-        Button btnExit = new Button("Salir");
+        // Botón "Acerca de" con ícono
+        ImageView infoIcon = new ImageView(new Image(getClass().getResource("/icons/info.png").toExternalForm()));
+        infoIcon.setFitWidth(16);
+        infoIcon.setFitHeight(16);
 
+        Button btnAbout = new Button("Acerca de", infoIcon);
         btnAbout.setStyle("""
             -fx-background-color: transparent;
             -fx-text-fill: #95A5A6;
-            -fx-font-size: 13px;
+            -fx-font-size: 15px;
             -fx-underline: true;
             -fx-cursor: hand;
         """);
         btnAbout.setOnMouseEntered(e -> btnAbout.setStyle("""
             -fx-background-color: transparent;
             -fx-text-fill: white;
-            -fx-font-size: 13px;
+            -fx-font-size: 15px;
             -fx-underline: true;
             -fx-cursor: hand;
         """));
         btnAbout.setOnMouseExited(e -> btnAbout.setStyle("""
             -fx-background-color: transparent;
             -fx-text-fill: #95A5A6;
-            -fx-font-size: 13px;
+            -fx-font-size: 15px;
             -fx-underline: true;
             -fx-cursor: hand;
         """));
-
-        btnExit.setStyle("""
-            -fx-background-color: #E74C3C;
-            -fx-text-fill: white;
-            -fx-font-size: 13px;
-            -fx-cursor: hand;
-        """);
-        btnExit.setOnMouseEntered(e -> btnExit.setStyle("""
-            -fx-background-color: #C0392B;
-            -fx-text-fill: white;
-            -fx-font-size: 13px;
-            -fx-cursor: hand;
-        """));
-        btnExit.setOnMouseExited(e -> btnExit.setStyle("""
-            -fx-background-color: #E74C3C;
-            -fx-text-fill: white;
-            -fx-font-size: 13px;
-            -fx-cursor: hand;
-        """));
-
         btnAbout.setOnAction(e -> {
             updateSelectedButton(null);
             content.getChildren().setAll(new AboutView());
-        });
-
-        btnExit.setOnAction(e -> {
-            updateSelectedButton(null);
-            content.getChildren().setAll(buildWelcomeScreen());
         });
 
         VBox topButtons = new VBox(10, title, separator, btnBinaryTree, btnAvlTree, btnSplayTree, btnBTree);
@@ -116,7 +104,7 @@ public class MainView extends BorderPane {
         bottomButtons.setSpacing(15);
         bottomButtons.setAlignment(Pos.CENTER);
         bottomButtons.setPadding(new Insets(10, 0, 0, 0));
-        bottomButtons.getChildren().addAll(btnAbout, btnExit);
+        bottomButtons.getChildren().addAll(btnAbout);  // Botón salir eliminado
 
         menuBox.getChildren().addAll(topButtons, spacer, bottomButtons);
         return menuBox;
