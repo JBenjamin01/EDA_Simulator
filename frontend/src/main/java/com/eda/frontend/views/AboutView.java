@@ -2,126 +2,109 @@ package com.eda.frontend.views;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 public class AboutView extends VBox {
 
     public AboutView() {
-        setPadding(new Insets(30));
-        setSpacing(12);
+        setPadding(new Insets(40));
+        setSpacing(20);
         setAlignment(Pos.TOP_LEFT);
+        setStyle("-fx-background-color: #F9F9F9;");
 
-        // Título principal
-        Label title = new Label("EDA - Simulator");
-        title.setFont(Font.font("Arial", 26));
-        title.setStyle("-fx-font-weight: bold;");
+        // Título
+        Label title = new Label("EDA Simulator");
+        title.setFont(Font.font("Arial", 30));
+        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2C3E50;");
 
-        // Universidad
-        Label university = new Label("Universidad Nacional de San Agustín de Arequipa");
-        university.setFont(Font.font("Arial", 18));
+        Label subtitle = new Label("Información del proyecto");
+        subtitle.setFont(Font.font("Arial", 16));
+        subtitle.setStyle("-fx-text-fill: #555555;");
 
-        // Escuela
-        Label school = new Label("Escuela Profesional de Ingeniería de Sistemas");
-        school.setFont(Font.font("Arial", 16));
+        Separator sep1 = new Separator();
 
-        // Curso
-        Label course = new Label("Curso: Estructura de Datos y Algoritmos");
-        course.setFont(Font.font("Arial", 16));
-
-        // Docente
-        Label teacher = new Label("Docente: Msc. Roni Guillermo Apaza Aceituno");
-        teacher.setFont(Font.font("Arial", 16));
-
-        // Semestre
-        Label semester = new Label("Semestre académico: 2025-I");
-        semester.setFont(Font.font("Arial", 16));
-
-        // Versión
-        Label version = new Label("Versión actual del sistema: 1.0 (2025)");
-        version.setFont(Font.font("Arial", 16));
-
-        // Integrantes
-        Label authorsTitle = new Label("Créditos del equipo desarrollador:");
-        authorsTitle.setFont(Font.font("Arial", 17));
-        authorsTitle.setStyle("-fx-font-weight: bold;");
-
-        VBox authorsList = new VBox();
-        authorsList.setSpacing(6);
-        authorsList.setAlignment(Pos.TOP_LEFT);
-
-        // Primer alumno
-        VBox alumno1 = new VBox(
-            styledLabel("- Jhonatan Benjamin Mamani Céspedes"),
-            createEmailHyperlink("jmamanices@unsa.edu.pe")
+        // Información institucional
+        VBox institutionInfo = new VBox(8,
+            styledInfo("Universidad Nacional de San Agustín de Arequipa", 18),
+            styledInfo("Escuela Profesional de Ingeniería de Sistemas", 16),
+            styledInfo("Curso: Estructura de Datos y Algoritmos", 16),
+            styledInfo("Docente: Msc. Roni Guillermo Apaza Aceituno", 16),
+            styledInfo("Semestre académico: 2025-I", 16),
+            styledInfo("Versión del sistema: 1.0 (2025)", 16)
         );
 
-        // Segundo alumno
-        VBox alumno2 = new VBox(
-            styledLabel("- Jeic Lucciano Valentino Tijero Dávila"),
-            createEmailHyperlink("jtijero@unsa.edu.pe")
+        Separator sep2 = new Separator();
+
+        // Créditos
+        Label authorsTitle = new Label("Equipo de desarrollo");
+        authorsTitle.setFont(Font.font("Arial", 18));
+        authorsTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #2C3E50;");
+
+        VBox authorsList = new VBox(10,
+            createAuthor("- Jhonatan Benjamin Mamani Céspedes", "jmamanices@unsa.edu.pe"),
+            createAuthor("- Jeic Lucciano Valentino Tijero Dávila", "jtijero@unsa.edu.pe")
         );
 
-        authorsList.getChildren().addAll(alumno1, alumno2);
+        Separator sep3 = new Separator();
 
-        // Herramientas usadas
-        Label tools = new Label("Tecnologías utilizadas: Java 17, JavaFX, Scene Builder, Spring Boot, Gradle, Maven.");
-        tools.setFont(Font.font("Arial", 15));
+        // Herramientas y recursos
+        VBox toolsInfo = new VBox(10);
+        toolsInfo.getChildren().addAll(
+            styledInfo("Tecnologías utilizadas: Java 17, JavaFX, Scene Builder, Spring Boot, Gradle, Maven.", 15),
+            styledInfo("Repositorio oficial:", 15),
+            createHyperlink("https://github.com/JBenjamin01/EDA_Simulator")
+        );
 
-        // Repositorio
-        Label repoLabel = new Label("Repositorio oficial:");
-        repoLabel.setFont(Font.font("Arial", 15));
-        Hyperlink githubLink = new Hyperlink("https://github.com/JBenjamin01/EDA_Simulator");
-        githubLink.setFont(Font.font("Arial", 14));
-        githubLink.setOnAction(e -> {
-            try {
-                java.awt.Desktop.getDesktop().browse(new java.net.URI("https://github.com/JBenjamin01/EDA_Simulator"));
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        });
+        Separator sep4 = new Separator();
 
-        // Licencia
-        Label license = new Label("Licencia: Proyecto académico libre para uso educativo.");
-        license.setFont(Font.font("Arial", 15));
-
-        // Créditos extra
-        Label extraCredits = new Label("Agradecimientos: Al docente guía y a los compañeros de curso.");
-        extraCredits.setFont(Font.font("Arial", 15));
+        // Licencia y agradecimientos
+        VBox closingNotes = new VBox(8,
+            styledInfo("Licencia: Proyecto académico libre para uso educativo.", 15),
+            styledInfo("Agradecimientos: Al docente guía y a los compañeros de curso.", 15)
+        );
 
         // Copyright
         Text copyrightText = new Text("© 2025 Universidad Nacional de San Agustín de Arequipa. Todos los derechos reservados.");
         copyrightText.setFill(Color.GRAY);
-        copyrightText.setStyle("-fx-font-size: 13px;");
         TextFlow copyright = new TextFlow(copyrightText);
 
         getChildren().addAll(
-            title,
-            university,
-            school,
-            course,
-            teacher,
-            semester,
-            version,
-            authorsTitle,
-            authorsList,
-            tools,
-            repoLabel,
-            githubLink,
-            license,
-            extraCredits,
+            title, subtitle, sep1,
+            institutionInfo, sep2,
+            authorsTitle, authorsList, sep3,
+            toolsInfo, sep4,
+            closingNotes,
+            new Separator(),
             copyright
         );
+    }
+
+    private Label styledInfo(String text, int fontSize) {
+        Label label = new Label(text);
+        label.setFont(Font.font("Arial", fontSize));
+        label.setStyle("-fx-text-fill: #333333;");
+        return label;
+    }
+
+    private VBox createAuthor(String name, String email) {
+        Label nameLabel = styledInfo(name, 15);
+        Hyperlink emailLink = createEmailHyperlink(email);
+        VBox authorBox = new VBox(2, nameLabel, emailLink);
+        authorBox.setAlignment(Pos.TOP_LEFT);
+        return authorBox;
     }
 
     private Hyperlink createEmailHyperlink(String email) {
         Hyperlink link = new Hyperlink(email);
         link.setFont(Font.font("Arial", 14));
+        link.setStyle("-fx-text-fill: #1a73e8;");
         link.setOnAction(e -> {
             try {
                 java.awt.Desktop.getDesktop().mail(new java.net.URI("mailto:" + email));
@@ -129,13 +112,20 @@ public class AboutView extends VBox {
                 ex.printStackTrace();
             }
         });
-        link.setStyle("-fx-text-fill: #1a73e8;");
         return link;
     }
 
-    private Label styledLabel(String text) {
-        Label label = new Label(text);
-        label.setFont(Font.font("Arial", 15));
-        return label;
+    private Hyperlink createHyperlink(String url) {
+        Hyperlink link = new Hyperlink(url);
+        link.setFont(Font.font("Arial", 14));
+        link.setStyle("-fx-text-fill: #1a73e8;");
+        link.setOnAction(e -> {
+            try {
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        return link;
     }
 }

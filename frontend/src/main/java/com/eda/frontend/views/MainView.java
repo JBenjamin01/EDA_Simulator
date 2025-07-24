@@ -38,13 +38,22 @@ public class MainView extends BorderPane {
         """);
         title.setMaxWidth(Double.MAX_VALUE);
         title.setAlignment(Pos.CENTER);
-
         title.setOnMouseClicked(e -> {
             updateSelectedButton(null);
             content.getChildren().setAll(buildWelcomeScreen());
         });
 
         Separator separator = new Separator();
+
+        // ▸ Estructuras Jerárquicas
+        Label treeTitle = new Label("Estructuras Jerárquicas ▾");
+        treeTitle.setStyle("""
+            -fx-text-fill: #ECF0F1;
+            -fx-font-size: 16px;
+            -fx-font-weight: bold;
+            -fx-cursor: hand;
+        """);
+        treeTitle.setPadding(new Insets(5, 0, 0, 10));
 
         Button btnBinaryTree = new Button("Árbol Binario");
         Button btnAvlTree = new Button("Árbol AVL");
@@ -63,7 +72,49 @@ public class MainView extends BorderPane {
             });
         }
 
-        // Botón "Acerca de" con ícono
+        VBox treeSection = new VBox(8, btnBinaryTree, btnAvlTree, btnSplayTree, btnBTree);
+        treeSection.setPadding(new Insets(5, 0, 0, 20));
+        treeSection.setVisible(true);
+        treeSection.setManaged(true);
+
+        treeTitle.setOnMouseClicked(e -> {
+            boolean visible = treeSection.isVisible();
+            treeSection.setVisible(!visible);
+            treeSection.setManaged(!visible);
+            treeTitle.setText("Estructuras Jerárquicas " + (visible ? "▸" : "▾"));
+        });
+
+        // ▸ Estructuras No Jerárquicas
+        Label listTitle = new Label("Estructuras No Jerárquicas ▾");
+        listTitle.setStyle("""
+            -fx-text-fill: #ECF0F1;
+            -fx-font-size: 16px;
+            -fx-font-weight: bold;
+            -fx-cursor: hand;
+        """);
+        listTitle.setPadding(new Insets(10, 0, 0, 10));
+
+        Button btnListStackQueue = new Button("Listas, Pilas y Colas");
+        styleMenuButton(btnListStackQueue);
+        btnListStackQueue.setMaxWidth(Double.MAX_VALUE);
+        btnListStackQueue.setOnAction(e -> {
+            updateSelectedButton(btnListStackQueue);
+            content.getChildren().setAll(); // <-- Asegúrate de tener esta vista creada
+        });
+
+        VBox nonTreeSection = new VBox(8, btnListStackQueue);
+        nonTreeSection.setPadding(new Insets(5, 0, 0, 20));
+        nonTreeSection.setVisible(true);
+        nonTreeSection.setManaged(true);
+
+        listTitle.setOnMouseClicked(e -> {
+            boolean visible = nonTreeSection.isVisible();
+            nonTreeSection.setVisible(!visible);
+            nonTreeSection.setManaged(!visible);
+            listTitle.setText("Estructuras No Jerárquicas " + (visible ? "▸" : "▾"));
+        });
+
+        // Botón "Acerca de"
         ImageView infoIcon = new ImageView(new Image(getClass().getResource("/icons/info.png").toExternalForm()));
         infoIcon.setFitWidth(16);
         infoIcon.setFitHeight(16);
@@ -72,7 +123,7 @@ public class MainView extends BorderPane {
         btnAbout.setStyle("""
             -fx-background-color: transparent;
             -fx-text-fill: #95A5A6;
-            -fx-font-size: 15px;
+            -fx-font-size: 16px;
             -fx-underline: true;
             -fx-cursor: hand;
         """);
@@ -95,7 +146,7 @@ public class MainView extends BorderPane {
             content.getChildren().setAll(new AboutView());
         });
 
-        VBox topButtons = new VBox(10, title, separator, btnBinaryTree, btnAvlTree, btnSplayTree, btnBTree);
+        VBox topButtons = new VBox(10, title, separator, treeTitle, treeSection, listTitle, nonTreeSection);
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
@@ -104,7 +155,7 @@ public class MainView extends BorderPane {
         bottomButtons.setSpacing(15);
         bottomButtons.setAlignment(Pos.CENTER);
         bottomButtons.setPadding(new Insets(10, 0, 0, 0));
-        bottomButtons.getChildren().addAll(btnAbout);  // Botón salir eliminado
+        bottomButtons.getChildren().addAll(btnAbout);
 
         menuBox.getChildren().addAll(topButtons, spacer, bottomButtons);
         return menuBox;
@@ -132,7 +183,7 @@ public class MainView extends BorderPane {
 
         // Logo actualizado
         ImageView logo = new ImageView(new Image(getClass().getResource("/icons/eda.png").toExternalForm()));
-        logo.setFitWidth(570);
+        logo.setFitWidth(540);
         logo.setPreserveRatio(true);
 
         // Separación visual entre logo y texto
