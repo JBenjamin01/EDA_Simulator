@@ -25,4 +25,9 @@ public class BinaryTree {
 
         return current;
     }
+
+    public void delete(int value) {
+      // TODO Auto-generated method stub
+      throw new UnsupportedOperationException("Unimplemented method 'delete'");
+    }
 }
