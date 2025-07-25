@@ -16,6 +16,7 @@ public class SplayTreeView extends VBox {
     private final SplayTree tree;
     private final TextField input;
     private final Button insert, delete, search;
+    private final TextArea logArea; // <-- Nuevo
 
     public SplayTreeView() {
         this.setSpacing(10);
@@ -55,7 +56,13 @@ public class SplayTreeView extends VBox {
         canvas.setPrefHeight(500);
         canvas.setPrefWidth(900);
 
-        getChildren().addAll(title, controls, canvas);
+        logArea = new TextArea(); // <-- Inicialización
+        logArea.setEditable(false);
+        logArea.setWrapText(true);
+        logArea.setPrefHeight(120);
+        logArea.setStyle("-fx-font-family: 'monospace'; -fx-font-size: 13px;");
+
+        getChildren().addAll(title, controls, canvas, logArea); // <-- Añadir log al layout
     }
 
     private Button styledButton(String text) {
@@ -92,9 +99,12 @@ public class SplayTreeView extends VBox {
     private void handleInsert() {
         try {
             int value = Integer.parseInt(input.getText());
+            input.clear();
+            logArea.clear();
+            logStep("Iniciando inserción del valor " + value);
             tree.insert(value);
             drawTree();
-            input.clear();
+            logStep("Valor insertado (y splay aplicado si fue necesario): " + value);
         } catch (NumberFormatException ex) {
             showError("Ingrese un número válido");
         }
@@ -103,9 +113,12 @@ public class SplayTreeView extends VBox {
     private void handleDelete() {
         try {
             int value = Integer.parseInt(input.getText());
+            input.clear();
+            logArea.clear();
+            logStep("Iniciando eliminación del valor " + value);
             tree.delete(value);
             drawTree();
-            input.clear();
+            logStep("Eliminación completada (y splay aplicado si fue necesario).");
         } catch (NumberFormatException ex) {
             showError("Ingrese un número válido");
         }
@@ -114,9 +127,12 @@ public class SplayTreeView extends VBox {
     private void handleSearch() {
         try {
             int value = Integer.parseInt(input.getText());
+            input.clear();
+            logArea.clear();
+            logStep("Iniciando búsqueda del valor " + value);
             tree.search(value);
             drawTreeWithHighlight(value);
-            input.clear();
+            logStep("Búsqueda completada. El valor fue splayeado si existía.");
         } catch (NumberFormatException ex) {
             showError("Ingrese un número válido");
         }
@@ -200,6 +216,10 @@ public class SplayTreeView extends VBox {
         ft.setFromValue(0);
         ft.setToValue(1);
         ft.play();
+    }
+
+    private void logStep(String message) {
+        logArea.appendText(message + "\n");
     }
 
     private void showError(String message) {
