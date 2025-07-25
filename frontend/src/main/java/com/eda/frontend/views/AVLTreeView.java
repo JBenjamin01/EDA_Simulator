@@ -10,13 +10,15 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import javafx.util.Duration;
 
+import java.io.*;
+
 public class AVLTreeView extends VBox {
 
     private final Pane canvas;
     private final AVLTree tree;
     private final TextField input;
-    private final Button insert, delete, search;
-    private final TextArea logArea; // NUEVO
+    private final Button insert, delete, search, save, load;
+    private final TextArea logArea;
 
     public AVLTreeView() {
         this.setSpacing(10);
@@ -43,12 +45,16 @@ public class AVLTreeView extends VBox {
         insert = styledButton("Insertar");
         delete = styledButton("Eliminar");
         search = styledButton("Buscar");
+        save = styledButton("Guardar");
+        load = styledButton("Cargar");
 
         insert.setOnAction(e -> handleInsert());
         delete.setOnAction(e -> handleDelete());
         search.setOnAction(e -> handleSearch());
+        save.setOnAction(e -> handleSave());
+        load.setOnAction(e -> handleLoad());
 
-        HBox controls = new HBox(10, input, insert, delete, search);
+        HBox controls = new HBox(10, input, insert, delete, search, save, load);
         controls.setPadding(new Insets(10));
 
         canvas = new Pane();
@@ -56,7 +62,7 @@ public class AVLTreeView extends VBox {
         canvas.setPrefHeight(500);
         canvas.setPrefWidth(900);
 
-        logArea = new TextArea(); // NUEVO
+        logArea = new TextArea();
         logArea.setEditable(false);
         logArea.setWrapText(true);
         logArea.setPrefHeight(120);
@@ -133,8 +139,6 @@ public class AVLTreeView extends VBox {
             logArea.clear();
 
             logStep("Iniciando búsqueda del valor " + value);
-            
-
             AVLTreeNode foundNode = tree.search(value);
             if (foundNode != null) {
                 logStep("Valor encontrado: " + value);
@@ -144,6 +148,25 @@ public class AVLTreeView extends VBox {
             drawTreeWithHighlight(value);
         } catch (NumberFormatException ex) {
             showError("Ingrese un número válido");
+        }
+    }
+
+    private void handleSave() {
+        try {
+            tree.saveToFile("avl_tree.ser");
+            logStep("Árbol guardado exitosamente en 'avl_tree.ser'");
+        } catch (IOException e) {
+            showError("Error al guardar el árbol: " + e.getMessage());
+        }
+    }
+
+    private void handleLoad() {
+        try {
+            tree.loadFromFile("avl_tree.ser");
+            drawTree();
+            logStep("Árbol cargado exitosamente desde 'avl_tree.ser'");
+        } catch (IOException | ClassNotFoundException e) {
+            showError("Error al cargar el árbol: " + e.getMessage());
         }
     }
 
