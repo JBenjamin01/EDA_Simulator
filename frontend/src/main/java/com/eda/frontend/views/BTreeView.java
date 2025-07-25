@@ -17,6 +17,7 @@ public class BTreeView extends VBox {
     private BTree tree;
     private final Pane canvas;
     private final ComboBox<Integer> degreeSelector;
+    private final TextArea logArea;
 
     public BTreeView() {
         setSpacing(10);
@@ -40,25 +41,27 @@ public class BTreeView extends VBox {
         controls.setPadding(new Insets(10));
         controls.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, new CornerRadii(8), Insets.EMPTY)));
         controls.setBorder(new Border(new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, new CornerRadii(8), BorderWidths.DEFAULT)));
-        controls.setSpacing(10);
-        controls.setPadding(new Insets(10));
-
-        Label gradoLabel = new Label("Grado:");
-        gradoLabel.setFont(new Font("Arial", 14));
-
-        controls.getChildren().addAll(gradoLabel, degreeSelector, input, insert, create);
+        controls.getChildren().addAll(new Label("Grado mínimo:"), degreeSelector, input, insert, create);
 
         canvas = new Pane();
         canvas.setStyle("-fx-border-color: gray; -fx-background-color: white;");
         canvas.setPrefHeight(500);
         canvas.setPrefWidth(800);
 
-        getChildren().addAll(title, controls, canvas);
+        logArea = new TextArea();
+        logArea.setEditable(false);
+        logArea.setWrapText(true);
+        logArea.setPrefHeight(120);
+        logArea.setStyle("-fx-font-family: 'monospace'; -fx-font-size: 13px;");
+
+        getChildren().addAll(title, controls, canvas, logArea);
 
         create.setOnAction(e -> {
             int degree = degreeSelector.getValue();
             tree = new BTree(degree);
             canvas.getChildren().clear();
+            logArea.clear();
+            logStep("Árbol B creado con grado " + degree);
         });
 
         insert.setOnAction(e -> {
@@ -68,8 +71,11 @@ public class BTreeView extends VBox {
                     showError("Debe crear el árbol primero");
                     return;
                 }
+
+                logStep("Insertando valor " + value + "...");
                 tree.insert(value);
                 drawTree();
+                logStep("Valor " + value + " insertado correctamente.");
                 input.clear();
             } catch (NumberFormatException ex) {
                 showError("Ingrese un número válido");
@@ -111,6 +117,10 @@ public class BTreeView extends VBox {
         ft.play();
 
         canvas.getChildren().add(nodeView);
+    }
+
+    private void logStep(String message) {
+        logArea.appendText(message + "\n");
     }
 
     private void showError(String msg) {

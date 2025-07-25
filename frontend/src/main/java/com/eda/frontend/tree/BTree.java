@@ -30,11 +30,14 @@ public class BTree {
         int i = node.keys.size() - 1;
 
         if (node.leaf) {
-            node.keys.add(0); // espacio temporal
+            node.keys.add(0); // espacio para insertar
+
+            // mover claves hacia la derecha para hacer espacio
             while (i >= 0 && key < node.keys.get(i)) {
                 node.keys.set(i + 1, node.keys.get(i));
                 i--;
             }
+
             node.keys.set(i + 1, key);
         } else {
             while (i >= 0 && key < node.keys.get(i)) {
@@ -42,29 +45,38 @@ public class BTree {
             }
             i++;
             BTreeNode child = node.children.get(i);
+
             if (child.keys.size() == 2 * t - 1) {
                 splitChild(node, i, child);
+
                 if (key > node.keys.get(i)) {
                     i++;
                 }
             }
+
             insertNonFull(node.children.get(i), key);
         }
     }
 
     private void splitChild(BTreeNode parent, int index, BTreeNode fullNode) {
         BTreeNode newNode = new BTreeNode(fullNode.leaf);
+
+        // mover las últimas (t - 1) claves a newNode
         for (int j = 0; j < t - 1; j++) {
             newNode.keys.add(fullNode.keys.remove(t));
         }
 
+        // mover hijos si no es hoja
         if (!fullNode.leaf) {
             for (int j = 0; j < t; j++) {
                 newNode.children.add(fullNode.children.remove(t));
             }
         }
 
+        // insertar newNode como hijo derecho
         parent.children.add(index + 1, newNode);
+
+        // mover clave media al padre
         parent.keys.add(index, fullNode.keys.remove(t - 1));
     }
 }

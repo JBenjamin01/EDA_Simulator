@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.eda.frontend.components.TreeNodeView;
 import com.eda.frontend.tree.BinaryTree;
@@ -98,10 +99,13 @@ public class BinaryTreeView extends VBox {
             BinaryTreeNode root = tree.getRoot();
             String datosComoTexto = mapper.writeValueAsString(root);
 
-            var requestMap = new java.util.HashMap<String, Object>();
-            requestMap.put("nombre", "Árbol Binario Guardado");
+            // Generar nombre aleatorio (por ejemplo: "Binario_ABC123")
+            String codigoAleatorio = "Binario_" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+
+            var requestMap = new HashMap<String, Object>();
+            requestMap.put("nombre", codigoAleatorio);
             requestMap.put("tipo", "BINARY");
-            requestMap.put("datosJson", datosComoTexto); // árbol completo serializado
+            requestMap.put("datosJson", datosComoTexto);
 
             String requestBody = mapper.writeValueAsString(requestMap);
 
@@ -113,9 +117,48 @@ public class BinaryTreeView extends VBox {
                 .build();
 
             client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenAccept(res -> Platform.runLater(() -> logStep("Guardado: " + res.body())));
+                .thenAccept(res -> Platform.runLater(() -> logStep("Árbol guardado correctamente como " + codigoAleatorio)));
         } catch (Exception e) {
             showError("Error al guardar estructura: " + e.getMessage());
+        }
+    }
+
+    private void cargarEstructura() {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080/api/estructuras/listar/BINARY"))
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenAccept(response -> {
+                    Platform.runLater(() -> {
+                        try {
+                            ObjectMapper mapper = new ObjectMapper();
+                            List<Map<String, Object>> estructuras = mapper.readValue(
+                                response.body(),
+                                mapper.getTypeFactory().constructCollectionType(List.class, Map.class)
+                            );
+
+                            if (estructuras.isEmpty()) {
+                                logStep("No se encontraron árboles binarios guardados.");
+                            } else {
+                                logStep("Estructuras binarias disponibles:");
+                                for (Map<String, Object> estructura : estructuras) {
+                                    String nombre = (String) estructura.get("nombre");
+                                    Long id = Long.valueOf(estructura.get("id").toString());
+                                    logStep(" - [" + id + "] " + nombre);
+                                }
+                            }
+                        } catch (Exception e) {
+                            showError("Error al procesar respuesta: " + e.getMessage());
+                        }
+                    });
+                });
+        } catch (Exception e) {
+            showError("Error al cargar estructuras: " + e.getMessage());
         }
     }
 
@@ -262,7 +305,6 @@ public class BinaryTreeView extends VBox {
             showError("Ingrese un número válido");
         }
     }
-
 
     private void handleSearch() {
         try {
