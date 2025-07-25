@@ -4,7 +4,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.eda.frontend.components.TreeNodeView;
 import com.eda.frontend.tree.BinaryTree;
@@ -88,16 +92,16 @@ public class BinaryTreeView extends VBox {
 
     private void guardarEstructura() {
         try {
-            List<Integer> valores = tree.inOrderValues();
             ObjectMapper mapper = new ObjectMapper();
 
-            // datosJson como string JSON (ya escapado)
-            String datosComoTexto = mapper.writeValueAsString(valores);
+            // Serializamos TODO el árbol, incluyendo hijos y coordenadas (x, y)
+            BinaryTreeNode root = tree.getRoot();
+            String datosComoTexto = mapper.writeValueAsString(root);
 
             var requestMap = new java.util.HashMap<String, Object>();
-            requestMap.put("nombre", "Árbol Guardado");
+            requestMap.put("nombre", "Árbol Binario Guardado");
             requestMap.put("tipo", "BINARY");
-            requestMap.put("datosJson", datosComoTexto);
+            requestMap.put("datosJson", datosComoTexto); // árbol completo serializado
 
             String requestBody = mapper.writeValueAsString(requestMap);
 
@@ -114,42 +118,6 @@ public class BinaryTreeView extends VBox {
             showError("Error al guardar estructura: " + e.getMessage());
         }
     }
-
-
-    private void cargarEstructura() {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://localhost:8080/api/estructuras/listar/BINARY"))
-            .build();
-
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-            .thenApply(HttpResponse::body)
-            .thenAccept(json -> {
-                Platform.runLater(() -> {
-                    logStep("Cargando árbol...");
-                    parseYReconstruir(json); // método que deserializa y reinserta
-                });
-            });
-    }
-
-    private void parseYReconstruir(String json) {
-        try {
-            // Extraer el último árbol guardado y parsear su lista
-            String datosJson = json.split("\"datosJson\":\"")[1].split("\"")[0];
-            datosJson = datosJson.replace("[", "").replace("]", "");
-            String[] valores = datosJson.split(",");
-
-            for (String val : valores) {
-                tree.insert(Integer.parseInt(val.trim()));
-            }
-
-            drawTree();
-            logStep("Árbol reconstruido desde BD.");
-        } catch (Exception e) {
-            showError("Error al reconstruir árbol desde JSON");
-        }
-    }
-
 
     private void logStep(String message) {
         logArea.appendText(message + "\n");

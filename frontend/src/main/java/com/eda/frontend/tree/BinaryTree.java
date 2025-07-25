@@ -114,11 +114,9 @@ public class BinaryTree {
         }
         return valores;
     }
-    
-    private void inOrderCollect(BinaryTreeNode node, List<Integer> result) {
-        if (node == null) return;
-        inOrderCollect(node.left, result);
-        result.add(node.value);
-        inOrderCollect(node.right, result);
+
+    public void setRoot(BinaryTreeNode node) {
+        this.root = node;
     }
+
 }

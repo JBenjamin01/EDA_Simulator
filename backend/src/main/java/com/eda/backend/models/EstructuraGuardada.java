@@ -19,7 +19,6 @@ public class EstructuraGuardada {
 
     private String tipo; // ej. "BINARY", "SPLAY", "AVL", "B"
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String datosJson; // La estructura serializada (lista, árbol, etc.)
 }
