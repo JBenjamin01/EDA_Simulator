@@ -1,9 +1,22 @@
 package com.eda.frontend.views;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import com.eda.frontend.components.BTreeNodeView;
 import com.eda.frontend.tree.BTree;
 import com.eda.frontend.tree.BTreeNode;
+import com.eda.frontend.tree.BinaryTreeNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -56,12 +69,20 @@ public class BTreeView extends VBox {
 
         getChildren().addAll(title, controls, canvas, logArea);
 
+        Button guardarBtn = new Button("Guardar");
+        guardarBtn.setOnAction(e -> guardarEstructura());
+
+        Button cargarBtn = new Button("Cargar");
+        cargarBtn.setOnAction(e -> cargarEstructura());
+
+        controls.getChildren().addAll(guardarBtn, cargarBtn);
+
         create.setOnAction(e -> {
             int degree = degreeSelector.getValue();
             tree = new BTree(degree);
             canvas.getChildren().clear();
             logArea.clear();
-            logStep("Árbol B creado con grado " + degree);
+            logStep("Árbol B creado con grado mínimo " + degree);
         });
 
         insert.setOnAction(e -> {
@@ -81,6 +102,78 @@ public class BTreeView extends VBox {
                 showError("Ingrese un número válido");
             }
         });
+    }
+
+    private void guardarEstructura() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            // Serializamos TODO el árbol
+            BTreeNode root = tree.getRoot();
+            
+            String datosComoTexto = mapper.writeValueAsString(root);
+
+            // Generar nombre aleatorio (por ejemplo: "Binario_ABC123")
+            String codigoAleatorio = "Splay_" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+
+            var requestMap = new HashMap<String, Object>();
+            requestMap.put("nombre", codigoAleatorio);
+            requestMap.put("tipo", "SPLAY");
+            requestMap.put("datosJson", datosComoTexto);
+
+            String requestBody = mapper.writeValueAsString(requestMap);
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080/api/estructuras/guardar"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenAccept(res -> Platform.runLater(() -> logStep("Árbol guardado correctamente como " + codigoAleatorio)));
+        } catch (Exception e) {
+            showError("Error al guardar estructura: " + e.getMessage());
+        }
+    }
+
+    private void cargarEstructura() {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080/api/estructuras/listar/SPLAY"))
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenAccept(response -> {
+                    Platform.runLater(() -> {
+                        try {
+                            ObjectMapper mapper = new ObjectMapper();
+                            List<Map<String, Object>> estructuras = mapper.readValue(
+                                response.body(),
+                                mapper.getTypeFactory().constructCollectionType(List.class, Map.class)
+                            );
+
+                            if (estructuras.isEmpty()) {
+                                logStep("No se encontraron árboles splay guardados.");
+                            } else {
+                                logStep("Estructuras splay disponibles:");
+                                for (Map<String, Object> estructura : estructuras) {
+                                    String nombre = (String) estructura.get("nombre");
+                                    Long id = Long.valueOf(estructura.get("id").toString());
+                                    logStep(" - [" + id + "] " + nombre);
+                                }
+                            }
+                        } catch (Exception e) {
+                            showError("Error al procesar respuesta: " + e.getMessage());
+                        }
+                    });
+                });
+        } catch (Exception e) {
+            showError("Error al cargar estructuras: " + e.getMessage());
+        }
     }
 
     private void drawTree() {
