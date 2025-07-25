@@ -1,5 +1,9 @@
 package com.eda.frontend.views;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 
 import com.eda.frontend.components.TreeNodeView;
@@ -8,6 +12,7 @@ import com.eda.frontend.tree.BinaryTreeNode;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -70,7 +75,81 @@ public class BinaryTreeView extends VBox {
         logArea.setPrefHeight(120);
         logArea.setStyle("-fx-font-family: 'monospace'; -fx-font-size: 13px;");
         getChildren().add(logArea);
+
+        Button guardarBtn = styledButton("Guardar");
+        guardarBtn.setOnAction(e -> guardarEstructura());
+
+        Button cargarBtn = styledButton("Cargar");
+        cargarBtn.setOnAction(e -> cargarEstructura());
+
+        controls.getChildren().addAll(guardarBtn, cargarBtn);
+
     }
+
+    private void guardarEstructura() {
+        try {
+            List<Integer> valores = tree.inOrderValues();
+            ObjectMapper mapper = new ObjectMapper();
+
+            // datosJson como string JSON (ya escapado)
+            String datosComoTexto = mapper.writeValueAsString(valores);
+
+            var requestMap = new java.util.HashMap<String, Object>();
+            requestMap.put("nombre", "Árbol Guardado");
+            requestMap.put("tipo", "BINARY");
+            requestMap.put("datosJson", datosComoTexto);
+
+            String requestBody = mapper.writeValueAsString(requestMap);
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080/api/estructuras/guardar"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenAccept(res -> Platform.runLater(() -> logStep("Guardado: " + res.body())));
+        } catch (Exception e) {
+            showError("Error al guardar estructura: " + e.getMessage());
+        }
+    }
+
+
+    private void cargarEstructura() {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:8080/api/estructuras/listar/BINARY"))
+            .build();
+
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+            .thenApply(HttpResponse::body)
+            .thenAccept(json -> {
+                Platform.runLater(() -> {
+                    logStep("Cargando árbol...");
+                    parseYReconstruir(json); // método que deserializa y reinserta
+                });
+            });
+    }
+
+    private void parseYReconstruir(String json) {
+        try {
+            // Extraer el último árbol guardado y parsear su lista
+            String datosJson = json.split("\"datosJson\":\"")[1].split("\"")[0];
+            datosJson = datosJson.replace("[", "").replace("]", "");
+            String[] valores = datosJson.split(",");
+
+            for (String val : valores) {
+                tree.insert(Integer.parseInt(val.trim()));
+            }
+
+            drawTree();
+            logStep("Árbol reconstruido desde BD.");
+        } catch (Exception e) {
+            showError("Error al reconstruir árbol desde JSON");
+        }
+    }
+
 
     private void logStep(String message) {
         logArea.appendText(message + "\n");

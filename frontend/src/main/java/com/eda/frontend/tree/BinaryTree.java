@@ -106,4 +106,19 @@ public class BinaryTree {
             inOrderHelper(node.right, result);
         }
     }
+
+    public List<Integer> inOrderValues() {
+        List<Integer> valores = new ArrayList<>();
+        for (BinaryTreeNode node : inOrderTraversal()) {
+            valores.add(node.value);
+        }
+        return valores;
+    }
+    
+    private void inOrderCollect(BinaryTreeNode node, List<Integer> result) {
+        if (node == null) return;
+        inOrderCollect(node.left, result);
+        result.add(node.value);
+        inOrderCollect(node.right, result);
+    }
 }

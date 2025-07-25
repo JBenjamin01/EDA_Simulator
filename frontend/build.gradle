@@ -1,6 +1,7 @@
 plugins {
-  id 'org.openjfx.javafxplugin' version "0.1.0"
-  id 'jpro-gradle-plugin'
+    id 'java' // <--- Este falta
+    id 'org.openjfx.javafxplugin' version "0.1.0"
+    id 'jpro-gradle-plugin'
 }
 
 version = "1.0-SNAPSHOT"
@@ -22,9 +23,15 @@ javafx {
 }
 
 application {
-  mainClassName = 'com.eda.frontend.Main'
+  mainClass = 'com.eda.frontend.Main'
 }
 
 jpro {
   port = 8091
+}
+
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.17.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.0'
 }
